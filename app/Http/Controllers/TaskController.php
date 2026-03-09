@@ -27,7 +27,7 @@ class TaskController extends Controller
 
         auth()->user()->tasks()->create($request->only('title', 'description'));
 
-        return redirect()->route('tasks.index')->with('success', 'Tarefa criada!');
+        return redirect()->route('home')->with('success', 'Tarefa criada!');
     }
 
     public function edit(Task $task)
@@ -51,7 +51,7 @@ class TaskController extends Controller
             'completed'   => $request->has('completed'),
         ]);
 
-        return redirect()->route('tasks.index')->with('success', 'Tarefa atualizada!');
+        return redirect()->route('home')->with('success', 'Tarefa atualizada!');
     }
 
     public function destroy(Task $task)
@@ -59,6 +59,6 @@ class TaskController extends Controller
         abort_if($task->user_id !== auth()->id(), 403);
         $task->delete();
 
-        return redirect()->route('tasks.index')->with('success', 'Tarefa removida!');
+        return redirect()->route('home')->with('success', 'Tarefa removida!');
     }
 }

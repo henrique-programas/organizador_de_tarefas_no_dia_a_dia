@@ -5,7 +5,12 @@ use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/home', function () {
-    return view('home');
+    $tasks = auth()->user()->tasks()->latest()->get();
+    $total = $tasks->count();
+    $concluidas = $tasks->where('completed', true)->count();
+    $pendentes = $tasks->where('completed', false)->count();
+    $taxa = $total > 0 ? round(($concluidas / $total) * 100) : 0;
+    return view('home', compact('tasks', 'total', 'concluidas', 'pendentes', 'taxa'));
 })->middleware(['auth', 'verified'])->name('home');
 
 Route::get('/teste', function () {

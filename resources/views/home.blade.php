@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>TaskFlow</title>
 
   {{-- Carrega o arquivo CSS principal da aplicação via helper do Laravel --}}
@@ -98,7 +99,7 @@
       </svg>
       Tarefas
       <!-- Contador de tarefas pendentes atualizado dinamicamente -->
-      <span class="nav-badge">0</span>
+      <span class="nav-badge">{{ $pendentes }}</span>
     </button>
 
     <!-- Link: Página de Perfil do usuário -->
@@ -190,22 +191,22 @@
       <div class="stats-strip">
         <!-- Total geral de tarefas cadastradas -->
         <div class="stat-box">
-          <div class="stat-num">—</div>
+          <div class="stat-num">{{ $total }}</div>
           <div class="stat-label">Total de Tarefas</div>
         </div>
         <!-- Quantidade de tarefas já concluídas (número em verde) -->
         <div class="stat-box">
-          <div class="stat-num" style="color:var(--success)">—</div>
+          <div class="stat-num" style="color:var(--success)">{{ $concluidas }}</div>
           <div class="stat-label">Concluídas</div>
         </div>
         <!-- Quantidade de tarefas ainda pendentes (número em amarelo) -->
         <div class="stat-box">
-          <div class="stat-num" style="color:var(--warn)">—</div>
+          <div class="stat-num" style="color:var(--warn)">{{ $pendentes }}</div>
           <div class="stat-label">Pendentes</div>
         </div>
         <!-- Percentual de conclusão calculado (número em roxo) -->
         <div class="stat-box">
-          <div class="stat-num" style="color:#8B5CF6">—%</div>
+          <div class="stat-num" style="color:#8B5CF6">{{ $taxa }}%</div>
           <div class="stat-label">Taxa de Conclusão</div>
         </div>
       </div>
@@ -419,6 +420,12 @@
         <p>Gerencie e acompanhe todas as suas tarefas.</p>
       </div>
 
+      @if(session('success'))
+        <div style="background:#D1FAE5;color:#065F46;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;">
+          {{ session('success') }}
+        </div>
+      @endif
+
       <!-- ── Barra de ferramentas: busca, filtros e botão de criar ── -->
       <div class="tasks-toolbar">
 
@@ -439,7 +446,7 @@
 
         <!-- Botão que abre o modal de criação de nova tarefa -->
         <!-- Adiciona a classe .open ao overlay #modal via JS inline -->
-        <button class="btn btn-primary" onclick="document.getElementById('modal').classList.add('open')">
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('modal').classList.add('open')">
           <!-- Ícone de + (adicionar) -->
           <svg viewBox="0 0 24 24">
             <line x1="12" y1="5" x2="12" y2="19"/>
@@ -455,31 +462,89 @@
       <!-- ── Seção: Tarefas Pendentes ── -->
       <!-- Badge .count exibe a contagem de itens e é atualizado via JS -->
       <div class="tasks-section-title">
-        Tarefas Pendentes <span class="count">0</span>
+        Tarefas Pendentes <span class="count">{{ $pendentes }}</span>
       </div>
       <!-- Estado vazio: visível quando não há tarefas pendentes cadastradas -->
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24">
-          <path d="M9 11l3 3L22 4"/>
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-        </svg>
-        <p>Nenhuma tarefa pendente.<br>Clique em "Adicionar Tarefa" para começar.</p>
-      </div>
+      @if($tasks->where('completed', false)->count() > 0)
+        <div class="tasks-grid">
+          @foreach($tasks->where('completed', false) as $task)
+            <div class="task-item">
+              <div class="ti-top">
+                <div class="ti-name">{{ $task->title }}</div>
+                <form action="{{ route('tasks.update', $task) }}" method="POST">
+                  @csrf @method('PUT')
+                  <input type="hidden" name="title" value="{{ $task->title }}">
+                  <input type="hidden" name="description" value="{{ $task->description }}">
+                  <input type="hidden" name="completed" value="1">
+                  <button type="submit" class="ti-check" title="Marcar como concluída">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                  </button>
+                </form>
+              </div>
+              <div class="ti-desc">{{ $task->description ?? 'Sem descrição' }}</div>
+              <div class="ti-footer">
+                <span class="ti-due">{{ $task->created_at->format('d/m/Y') }}</span>
+                <div style="display:flex;gap:6px">
+                  <button type="button" 
+                          onclick="openEdit({{ $task->id }}, '{{ addslashes($task->title) }}', '{{ addslashes($task->description) }}', {{ $task->completed ? 'true' : 'false' }})"
+                          style="font-size:11px;color:var(--blue-primary);background:none;border:none;cursor:pointer;">
+                          Editar
+                  </button>
+                  <form action="{{ route('tasks.destroy', $task) }}" method="POST">
+                    @csrf @method('DELETE')
+                    <button type="submit" style="font-size:11px;color:#EF4444;background:none;border:none;cursor:pointer;">Excluir</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          @endforeach
+        </div>
+      @else
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <p>Nenhuma tarefa pendente.<br>Clique em "Adicionar Tarefa" para começar.</p>
+        </div>
+      @endif
 
 
       <!-- ── Seção: Tarefas Concluídas ── -->
       <!-- Badge .count.done usa cor verde para diferenciar do badge de pendentes -->
       <div class="tasks-section-title">
-        Tarefas Concluídas <span class="count done">0</span>
+        Tarefas Concluídas <span class="count done">{{ $concluidas }}</span>
       </div>
       <!-- Estado vazio: visível quando nenhuma tarefa foi concluída ainda -->
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10"/>
-          <polyline points="12 6 12 12 16 14"/>
-        </svg>
-        <p>Nenhuma tarefa concluída ainda.</p>
-      </div>
+      @if($tasks->where('completed', true)->count() > 0)
+        <div class="tasks-grid">
+          @foreach($tasks->where('completed', true) as $task)
+            <div class="task-item done">
+              <div class="ti-top">
+                <div class="ti-name">{{ $task->title }}</div>
+                <form action="{{ route('tasks.update', $task) }}" method="POST">
+                  @csrf @method('PUT')
+                  <input type="hidden" name="title" value="{{ $task->title }}">
+                  <input type="hidden" name="description" value="{{ $task->description }}">
+                  <button type="submit" class="ti-check checked" title="Desmarcar tarefa">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                  </button>
+                </form>
+              </div>
+              <div class="ti-desc">{{ $task->description ?? 'Sem descrição' }}</div>
+              <div class="ti-footer">
+                <span class="ti-due">{{ $task->created_at->format('d/m/Y') }}</span>
+                <form action="{{ route('tasks.destroy', $task) }}" method="POST">
+                  @csrf @method('DELETE')
+                  <button type="submit" style="font-size:11px;color:#EF4444;background:none;border:none;cursor:pointer;">Excluir</button>
+                </form>
+              </div>
+            </div>
+          @endforeach
+        </div>
+      @else
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <p>Nenhuma tarefa concluída ainda.</p>
+        </div>
+      @endif
 
 
       <!-- ── Ações globais da página de tarefas ── -->
@@ -493,7 +558,7 @@
           Adicionar Tarefa
         </button>
         <!-- Marca todas as tarefas pendentes como concluídas de uma só vez -->
-        <button class="btn btn-outline">
+        <button type="button" class="btn btn-outline">
           <svg viewBox="0 0 24 24">
             <path d="M9 11l3 3L22 4"/>
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
@@ -761,18 +826,18 @@
     </div>
 
     <!-- Corpo do formulário de criação de tarefa -->
-    <div class="modal-form">
-
+    <form method="POST" action="{{ route('tasks.store') }}" class="modal-form">
+      @csrf
       <!-- Campo: nome/título da tarefa (obrigatório) -->
       <div class="form-group">
         <label>Nome da Tarefa</label>
-        <input type="text" placeholder="Ex: Revisar relatório mensal"/>
+        <input type="text" name="title" placeholder="Ex: Revisar relatório mensal" required/>
       </div>
 
       <!-- Campo: descrição detalhada (textarea com resize vertical habilitado via CSS) -->
       <div class="form-group">
         <label>Descrição</label>
-        <textarea placeholder="Descreva os detalhes da tarefa..."></textarea>
+        <textarea name="description" placeholder="Descreva os detalhes da tarefa..."></textarea>
       </div>
 
       <!-- Linha com dois selects em colunas iguais -->
@@ -807,11 +872,11 @@
       <!-- Ações do modal: cancelar (descarta) ou criar (salva) -->
       <div class="modal-actions">
         <!-- Fecha o modal sem salvar nenhuma informação -->
-        <button class="btn btn-outline" onclick="document.getElementById('modal').classList.remove('open')">
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('modal').classList.remove('open')">
           Cancelar
         </button>
         <!-- Confirma a criação da tarefa — lógica de submit tratada no home.js -->
-        <button class="btn btn-primary">
+        <button type="submit" class="btn btn-primary">
           <!-- Ícone de + -->
           <svg viewBox="0 0 24 24">
             <line x1="12" y1="5" x2="12" y2="19"/>
@@ -821,12 +886,51 @@
         </button>
       </div>
 
-    </div>
+    </form>
     <!-- /modal-form -->
 
   </div>
 </div>
 <!-- /modal -->
+
+<!-- MODAL EDITAR TAREFA -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Editar Tarefa</h3>
+      <button type="button" class="modal-close" onclick="document.getElementById('modal-edit').classList.remove('open')">
+        <svg viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <form method="POST" id="form-edit" class="modal-form">
+      @csrf @method('PUT')
+      <div class="form-group">
+        <label>Nome da Tarefa</label>
+        <input type="text" name="title" id="edit-title" required/>
+      </div>
+      <div class="form-group">
+        <label>Descrição</label>
+        <textarea name="description" id="edit-description"></textarea>
+      </div>
+      <div class="form-group" style="flex-direction:row;align-items:center;gap:8px;">
+        <input type="checkbox" name="completed" id="edit-completed">
+        <label for="edit-completed" style="text-transform:none;font-size:13px;">Marcar como concluída</label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-edit').classList.remove('open')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">
+          <svg viewBox="0 0 24 24">
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Salvar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 
 {{-- Carrega o JavaScript principal via helper do Laravel.
