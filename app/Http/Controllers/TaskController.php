@@ -25,7 +25,7 @@ class TaskController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        auth()->user()->tasks()->create($request->only('title', 'description'));
+        auth()->user()->tasks()->create($request->only('title', 'description', 'type'));
 
         return redirect()->route('home')->with('success', 'Tarefa criada!');
     }
@@ -49,6 +49,7 @@ class TaskController extends Controller
             'title'       => $request->title,
             'description' => $request->description,
             'completed'   => $request->has('completed'),
+            'type'        => $request->type,
         ]);
 
         return redirect()->route('home')->with('success', 'Tarefa atualizada!');

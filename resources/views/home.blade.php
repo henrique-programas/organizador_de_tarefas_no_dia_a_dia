@@ -468,7 +468,7 @@
       @if($tasks->where('completed', false)->count() > 0)
         <div class="tasks-grid">
           @foreach($tasks->where('completed', false) as $task)
-            <div class="task-item">
+            <div class="task-item" data-type="{{ $task->type }}">
               <div class="ti-top">
                 <div class="ti-name">{{ $task->title }}</div>
                 <form action="{{ route('tasks.update', $task) }}" method="POST">
@@ -476,6 +476,7 @@
                   <input type="hidden" name="title" value="{{ $task->title }}">
                   <input type="hidden" name="description" value="{{ $task->description }}">
                   <input type="hidden" name="completed" value="1">
+                  <input type="hidden" name="type" value="{{ $task->type }}">
                   <button type="submit" class="ti-check" title="Marcar como concluída">
                     <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                   </button>
@@ -486,9 +487,9 @@
                 <span class="ti-due">{{ $task->created_at->format('d/m/Y') }}</span>
                 <div style="display:flex;gap:6px">
                   <button type="button" 
-                          onclick="openEdit({{ $task->id }}, '{{ addslashes($task->title) }}', '{{ addslashes($task->description) }}', {{ $task->completed ? 'true' : 'false' }})"
-                          style="font-size:11px;color:var(--blue-primary);background:none;border:none;cursor:pointer;">
-                          Editar
+                    onclick="openEdit({{ $task->id }}, '{{ addslashes($task->title) }}', '{{ addslashes($task->description) }}', {{ $task->completed ? 'true' : 'false' }}, '{{ $task->type }}')"
+                    style="font-size:11px;color:var(--blue-primary);background:none;border:none;cursor:pointer;">
+                    Editar
                   </button>
                   <form action="{{ route('tasks.destroy', $task) }}" method="POST">
                     @csrf @method('DELETE')
@@ -516,13 +517,17 @@
       @if($tasks->where('completed', true)->count() > 0)
         <div class="tasks-grid">
           @foreach($tasks->where('completed', true) as $task)
-            <div class="task-item done">
+            <div class="task-item done" data-type="{{ $task->type }}">
               <div class="ti-top">
                 <div class="ti-name">{{ $task->title }}</div>
+                <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--blue-xlight);color:var(--blue-primary);">
+                  {{ ucfirst($task->type) }}
+                </span>
                 <form action="{{ route('tasks.update', $task) }}" method="POST">
                   @csrf @method('PUT')
                   <input type="hidden" name="title" value="{{ $task->title }}">
                   <input type="hidden" name="description" value="{{ $task->description }}">
+                  <input type="hidden" name="type" value="{{ $task->type }}">
                   <button type="submit" class="ti-check checked" title="Desmarcar tarefa">
                     <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                   </button>
@@ -845,10 +850,10 @@
         <!-- Select: tipo de periodicidade da tarefa -->
         <div class="form-group">
           <label>Tipo</label>
-          <select>
-            <option>Diária</option>
-            <option>Semanal</option>
-            <option>Mensal</option>
+          <select name="type" id="create-type">
+            <option value="diaria">Diária</option>
+            <option value="semanal">Semanal</option>
+            <option value="mensal">Mensal</option>
           </select>
         </div>
         <!-- Select: nível de prioridade da tarefa -->
@@ -914,6 +919,14 @@
       <div class="form-group">
         <label>Descrição</label>
         <textarea name="description" id="edit-description"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select name="type" id="edit-type">
+          <option value="diaria">Diária</option>
+          <option value="semanal">Semanal</option>
+          <option value="mensal">Mensal</option>
+        </select>
       </div>
       <div class="form-group" style="flex-direction:row;align-items:center;gap:8px;">
         <input type="checkbox" name="completed" id="edit-completed">
