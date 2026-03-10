@@ -42,13 +42,38 @@ Route::get('/home', function () {
         ? round($semanais->where('completed', true)->count() / $totalSemanal * 100) : 0;
     $taxaMensal  = $totalMensal  > 0
         ? round($mensais->where('completed', true)->count()  / $totalMensal  * 100) : 0;
+
+    $tarefasEsteMes = $tasks->filter(function($task) {
+        return $task->created_at->month === now()->month &&
+               $task->created_at->year === now()->year;
+    })->count();
+
+    $concluidasNoPrazo = $tasks->filter(function($task) {
+        return $task->completed &&
+               $task->due_date &&
+               $task->updated_at->toDateString() <=$task->due_date;
+    })->count();
+
+    $streak = 0;
+    $dia = now()->startOfDay();
+    while (true) {
+        $temAtividade = $tasks->filter(function($task) use ($dia) {
+            return $task->created_at->toDateString() === $dia->toDateString() ||
+            ($task->completed && $task->updated_at->toDateString() === $dia->toDateString());
+        })->count() > 0;
+
+        if (!$temAtividade) break;
+        $streak++;
+        $dia->subDay();
+    }
     
     return view('home', compact(
         'tasks', 'total', 'concluidas', 'pendentes', 'taxa',
         'tarefaDiaria', 'tarefaSemanal', 'tarefaMensal',
         'totalDiarias', 'totalSemanal', 'totalMensal',
         'taxaDiaria', 'taxaSemanal', 'taxaMensal',
-        'pendentesDiarias', 'pendentesSemanaias', 'pendentesMensais'
+        'pendentesDiarias', 'pendentesSemanaias', 'pendentesMensais',
+        'tarefasEsteMes', 'concluidasNoPrazo', 'streak' // ← faltava isso
     ));
 })->middleware(['auth', 'verified'])->name('home');
 

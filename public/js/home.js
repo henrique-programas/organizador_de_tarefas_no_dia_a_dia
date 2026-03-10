@@ -55,3 +55,10 @@ document.querySelector('.search-box input').addEventListener('input', function()
     item.style.display = name.includes(search) ? '' : 'none';
   });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const hasProfileStatus = document.querySelector('#page-perfil .profile-status');
+    if (hasProfileStatus) {
+        navigate('perfil');
+    }
+});

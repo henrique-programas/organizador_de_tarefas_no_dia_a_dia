@@ -109,42 +109,7 @@
     </button>
 
     <!-- Rótulo da seção de filtros rápidos -->
-    <div class="sidebar-label">Filtros</div>
-
-    <!-- Filtro rápido: exibe somente tarefas diárias -->
-    <button class="nav-item">
-      <!-- Ícone de relógio -->
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12 6 12 12 16 14"/>
-      </svg>
-      Diárias
-    </button>
-
-    <!-- Filtro rápido: exibe somente tarefas semanais -->
-    <button class="nav-item">
-      <!-- Ícone de calendário simples -->
-      <svg viewBox="0 0 24 24">
-        <rect x="3" y="4" width="18" height="18" rx="2"/>
-        <line x1="16" y1="2" x2="16" y2="6"/>
-        <line x1="8" y1="2" x2="8" y2="6"/>
-        <line x1="3" y1="10" x2="21" y2="10"/>
-      </svg>
-      Semanais
-    </button>
-
-    <!-- Filtro rápido: exibe somente tarefas mensais -->
-    <button class="nav-item">
-      <!-- Ícone de calendário com linha extra de grade -->
-      <svg viewBox="0 0 24 24">
-        <rect x="3" y="4" width="18" height="18" rx="2"/>
-        <line x1="16" y1="2" x2="16" y2="6"/>
-        <line x1="8" y1="2" x2="8" y2="6"/>
-        <line x1="3" y1="10" x2="21" y2="10"/>
-        <line x1="8" y1="14" x2="16" y2="14"/>
-      </svg>
-      Mensais
-    </button>
+    <div class="sidebar-label">Configurações</div>
 
     <!-- Rodapé da sidebar: botão de logout destacado em vermelho -->
     <div class="sidebar-bottom">
@@ -414,9 +379,6 @@
               </div>
               <div class="ti-desc">{{ $task->description ?? 'Sem descrição' }}</div>
               <div style="display:flex;gap:6px;margin-bottom:8px;">
-                <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--blue-xlight);color:var(--blue-primary);">
-                  {{ ucfirst($task->type) }}
-                </span>
                 @if($task->priority === 'alta')
                   <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#FEE2E2;color:#DC2626;">Alta</span>
                 @elseif($task->priority === 'media')
@@ -540,6 +502,7 @@
             Excluir Todas
           </button>
         </form>
+      </div>
 
     </div>
     <!-- /page-tarefas -->
@@ -553,6 +516,26 @@
            - Direita: gráfico de desempenho, estatísticas e atividade semanal
     ════════════════════════════════════════════ -->
     <div class="page" id="page-perfil">
+
+      @if($errors->any())
+        <div class="profile-status" style="background:#FEE2E2;color:#DC2626;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;">
+          @foreach($errors->all() as $error)
+            <div>{{ $error }}</div>
+          @endforeach
+        </div>
+      @endif
+
+      @if(session('status') === 'profile-updated')
+        <div class="profile-status" style="background:#D1FAE5;color:#065F46;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;">
+          Perfil atualizado com sucesso!
+        </div>
+      @endif
+
+      @if(session('status') === 'password-updated')
+        <div class="profile-status" style="background:#D1FAE5;color:#065F46;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;">
+          Senha alterada com sucesso!
+        </div>
+      @endif
 
       <!-- Título e subtítulo da página -->
       <div class="page-header">
@@ -591,30 +574,45 @@
           <!-- Card: formulário para editar as informações da conta -->
           <div class="card">
             <div class="card-title">
-              <!-- Ícone de lápis -->
               <svg viewBox="0 0 24 24">
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
               </svg>
               Editar Informações
             </div>
             <div class="edit-form">
-              <!-- Campo: nome completo do usuário -->
-              <div class="form-group">
-                <label>Nome completo</label>
-                <input type="text" placeholder="Seu nome"/>
-              </div>
-              <!-- Campo: endereço de e-mail -->
-              <div class="form-group">
-                <label>E-mail</label>
-                <input type="email" placeholder="seu@email.com"/>
-              </div>
-              <!-- Campo: nova senha (valor oculto com type="password") -->
-              <div class="form-group">
-                <label>Nova senha</label>
-                <input type="password" placeholder="••••••••"/>
-              </div>
-              <!-- Botão de submissão para salvar as alterações -->
-              <button class="btn btn-primary" style="margin-top:4px">Salvar Alterações</button>
+
+              <!-- Formulário: nome e email -->
+              <form method="POST" action="{{ route('profile.update') }}">
+                @csrf @method('PATCH')
+                <div class="form-group">
+                  <label>Nome completo</label>
+                  <input type="text" name="name" value="{{ Auth::user()->name }}" required/>
+                </div>
+                <div class="form-group">
+                  <label>E-mail</label>
+                  <input type="email" name="email" value="{{ Auth::user()->email }}" required/>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:4px">Salvar Alterações</button>
+              </form>
+
+              <!-- Formulário separado: senha -->
+              <form method="POST" action="{{ route('password.update') }}" style="margin-top:16px">
+                @csrf @method('PUT')
+                <div class="form-group">
+                  <label>Senha Atual</label>
+                  <input type="password" name="current_password" placeholder="••••••••"/>
+                </div>
+                <div class="form-group">
+                  <label>Nova Senha</label>
+                  <input type="password" name="password" placeholder="••••••••"/>
+                </div>
+                <div class="form-group">
+                  <label>Confirmar Nova Senha</label>
+                  <input type="password" name="password_confirmation" placeholder="••••••••"/>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:4px">Alterar Senha</button>
+              </form>
+
             </div>
           </div>
           <!-- /card editar informações -->
@@ -623,17 +621,20 @@
           <div class="danger-zone">
             <div class="danger-title">Zona de Perigo</div>
             <div class="danger-desc">Estas ações são irreversíveis. Tenha certeza antes de prosseguir.</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <!-- Remove permanentemente a conta e todos os dados do usuário -->
-              <button class="btn btn-danger">
-                <!-- Ícone de lixeira -->
+            <form method="POST" action="{{ route('profile.destroy') }}" onsubmit="return confirm('Tem certeza? Sua conta e todos os dados serão apagados permanentemente!')">
+              @csrf @method('DELETE')
+              <div class="form-group" style="margin-bottom:12px">
+                <label>Confirme sua senha para excluir</label>
+                <input type="password" name="password" placeholder="••••••••" required/>
+              </div>
+              <button type="submit" class="btn btn-danger">
                 <svg viewBox="0 0 24 24">
                   <polyline points="3 6 5 6 21 6"/>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
                 </svg>
                 Excluir Conta
               </button>
-            </div>
+            </form>
           </div>
           <!-- /danger-zone -->
 
@@ -653,38 +654,46 @@
 
               <!-- Gráfico SVG de rosca — arcos coloridos renderizados dinamicamente via JS -->
               <svg width="160" height="160" viewBox="0 0 160 160">
-                <!-- Trilha de fundo cinza (círculo completo sem preenchimento) -->
-                <circle cx="80" cy="80" r="60" fill="none" stroke="var(--gray-border)" stroke-width="22"/>
-                <!-- Texto central: percentual geral de conclusão -->
-                <text x="80" y="76" text-anchor="middle" font-family="Sora,sans-serif" font-size="18" font-weight="700" fill="var(--text-soft)">—%</text>
-                <!-- Rótulo descritivo abaixo do percentual -->
+                @if($total > 0)
+                  {{-- Azul: círculo completo de fundo --}}
+                  <circle cx="80" cy="80" r="60" fill="none"
+                    stroke="#3B82F6"
+                    stroke-width="22"
+                    stroke-dasharray="376.99 0"/>
+              
+                  {{-- Verde: arco proporcional às concluídas --}}
+                  <circle cx="80" cy="80" r="60" fill="none"
+                    stroke="#10B981"
+                    stroke-width="22"
+                    stroke-dasharray="{{ round(($concluidas / $total) * 376.99) }} 376.99"
+                    transform="rotate(-90 80 80)"/>
+                @else
+                  <circle cx="80" cy="80" r="60" fill="none" stroke="var(--gray-border)" stroke-width="22"/>
+                @endif
+                <text x="80" y="76" text-anchor="middle" font-family="Sora,sans-serif" font-size="18" font-weight="700" fill="var(--text-soft)">{{ $taxa }}%</text>
                 <text x="80" y="94" text-anchor="middle" font-family="Sora,sans-serif" font-size="10" fill="var(--text-soft)">conclusão</text>
               </svg>
-
-              <!-- Legenda do gráfico de rosca -->
+              
               <div class="donut-legend">
-                <!-- Item: tarefas concluídas (ponto verde) -->
                 <div class="legend-item">
                   <div class="legend-dot" style="background:var(--success)"></div>
                   <div class="legend-text">
-                    <strong>Legenda</strong>
+                    <strong>{{ $concluidas }}</strong>
                     <span>Concluídas</span>
                   </div>
                 </div>
-                <!-- Item: tarefas em andamento (ponto azul) -->
                 <div class="legend-item">
                   <div class="legend-dot" style="background:var(--blue-primary)"></div>
                   <div class="legend-text">
-                    <strong>Legenda</strong>
-                    <span>Em andamento</span>
+                    <strong>{{ $pendentes }}</strong>
+                    <span>Pendentes</span>
                   </div>
                 </div>
-                <!-- Item: tarefas atrasadas (ponto amarelo) -->
                 <div class="legend-item">
                   <div class="legend-dot" style="background:var(--warn)"></div>
                   <div class="legend-text">
-                    <strong>Legenda</strong>
-                    <span>Atrasadas</span>
+                    <strong>{{ $total }}</strong>
+                    <span>Total</span>
                   </div>
                 </div>
               </div>
@@ -705,24 +714,16 @@
               Estatísticas de Desempenho
             </div>
             <div class="perf-stats">
-              <!-- Total de tarefas criadas no mês corrente -->
               <div class="perf-item">
-                <div class="perf-num">—</div>
+                <div class="perf-num">{{ $tarefasEsteMes }}</div>
                 <div class="perf-label">Tarefas este mês</div>
               </div>
-              <!-- Quantidade concluída dentro do prazo (número em verde) -->
               <div class="perf-item">
-                <div class="perf-num" style="color:var(--success)">—</div>
+                <div class="perf-num" style="color:var(--success)">{{ $concluidasNoPrazo }}</div>
                 <div class="perf-label">Concluídas no prazo</div>
               </div>
-              <!-- Tempo médio gasto por tarefa em horas (número em amarelo) -->
               <div class="perf-item">
-                <div class="perf-num" style="color:var(--warn)">—</div>
-                <div class="perf-label">Tempo médio/tarefa</div>
-              </div>
-              <!-- Sequência atual de dias consecutivos com atividade (número em roxo) -->
-              <div class="perf-item">
-                <div class="perf-num" style="color:#8B5CF6">—</div>
+                <div class="perf-num" style="color:#8B5CF6">{{ $streak }}</div>
                 <div class="perf-label">Dias consecutivos</div>
               </div>
             </div>
