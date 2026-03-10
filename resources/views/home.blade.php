@@ -552,21 +552,32 @@
 
           <!-- Card: avatar, nome, e-mail e botões de ação rápida -->
           <div class="profile-card card">
-            <!-- Círculo com iniciais do usuário — substituído por foto quando disponível -->
-            <div class="profile-avatar">—</div>
+            <div class="profile-avatar">
+              @if(Auth::user()->avatar)
+                <img src="{{ Storage::url(Auth::user()->avatar) }}" 
+                     style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+              @else
+                {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+              @endif
+            </div>
             <div class="profile-name">{{ Auth::user()->name }}</div>
             <div class="profile-email">{{ Auth::user()->email }}</div>
-            <!-- Botões de ação rápida do card de perfil -->
             <div class="profile-btns">
-              <!-- Abre o seletor para trocar a foto de perfil -->
-              <button class="btn btn-primary">
-                <!-- Ícone de câmera fotográfica -->
+              <label for="avatar-input" class="btn btn-primary" style="cursor:pointer;">
                 <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                   <circle cx="12" cy="13" r="4"/>
                 </svg>
                 Alterar Foto
-              </button>
+              </label>
+              <input type="file" id="avatar-input" name="avatar" accept="image/*" style="display:none;"
+                onchange="document.getElementById('form-avatar').submit()"/>
+              <form id="form-avatar" method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" style="display:none;">
+                @csrf @method('PATCH')
+                <input type="hidden" name="name" value="{{ Auth::user()->name }}">
+                <input type="hidden" name="email" value="{{ Auth::user()->email }}">
+                <input type="file" name="avatar" id="avatar-file-hidden"/>
+              </form>
             </div>
           </div>
           <!-- /profile-card -->
@@ -660,7 +671,7 @@
                     stroke="#3B82F6"
                     stroke-width="22"
                     stroke-dasharray="376.99 0"/>
-              
+
                   {{-- Verde: arco proporcional às concluídas --}}
                   <circle cx="80" cy="80" r="60" fill="none"
                     stroke="#10B981"
@@ -927,20 +938,6 @@
   </div>
 </div>
 
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-        initialView: 'dayGridMonth',
-        locale: 'pt-br',
-        events: '/tasks/calendar-events',
-        eventClick: function(info) {
-            alert('Tarefa: ' + info.event.title);
-        }
-    });
-    calendar.render();
-});
-</script>
 <script src="{{ asset('js/home.js') }}"></script>
 
 

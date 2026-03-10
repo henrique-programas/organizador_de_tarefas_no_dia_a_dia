@@ -62,3 +62,22 @@ document.addEventListener('DOMContentLoaded', function() {
         navigate('perfil');
     }
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+        initialView: 'dayGridMonth',
+        locale: 'pt-br',
+        events: '/tasks/calendar-events',
+        eventClick: function(info) {
+            alert('Tarefa: ' + info.event.title);
+        }
+    });
+    calendar.render();
+});
+
+document.getElementById('avatar-input').addEventListener('change', function() {
+    const dt = new DataTransfer();
+    dt.items.add(this.files[0]);
+    document.getElementById('avatar-file-hidden').files = dt.files;
+    document.getElementById('form-avatar').submit();
+});
