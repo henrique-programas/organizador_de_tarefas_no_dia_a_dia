@@ -6,12 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>TaskFlow</title>
-
-  {{-- Carrega o arquivo CSS principal da aplicação via helper do Laravel --}}
   <link rel="stylesheet" href="{{ asset('css/home.css') }}">
-
-  {{-- Importa a fonte Sora do Google Fonts com os pesos: light (300), regular (400),
-       medium (500), semibold (600) e bold (700) --}}
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
@@ -297,76 +293,8 @@
             Calendário de Tarefas
           </div>
 
-          <!-- Navegação entre meses: seta anterior, título do mês e seta próximo -->
-          <div class="cal-nav">
-            <button class="cal-nav-btn">
-              <!-- Seta para o mês anterior -->
-              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <!-- Título do mês/ano — preenchido dinamicamente via JS -->
-            <span class="cal-nav-title">Mês / Ano</span>
-            <button class="cal-nav-btn">
-              <!-- Seta para o próximo mês -->
-              <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
+          <div id="calendar"></div>
 
-          <!-- Grade do calendário: 7 colunas (Dom → Sáb) -->
-          <div class="cal-grid">
-
-            <!-- Cabeçalhos dos dias da semana -->
-            <div class="cal-h">DOM</div>
-            <div class="cal-h">SEG</div>
-            <div class="cal-h">TER</div>
-            <div class="cal-h">QUA</div>
-            <div class="cal-h">QUI</div>
-            <div class="cal-h">SEX</div>
-            <div class="cal-h">SÁB</div>
-
-            <!-- Dias vazios (.off) do mês anterior para alinhar o dia 1 na coluna correta -->
-            <div class="cal-d off"></div>
-            <div class="cal-d off"></div>
-            <div class="cal-d off"></div>
-            <div class="cal-d off"></div>
-            <div class="cal-d off"></div>
-            <div class="cal-d off"></div>
-
-            <!-- Dias do mês atual (1 a 31) -->
-            <!-- O dia atual recebe a classe .today para destaque visual em azul -->
-            <div class="cal-d">1</div>
-            <div class="cal-d">2</div>
-            <div class="cal-d">3</div>
-            <div class="cal-d">4</div>
-            <div class="cal-d">5</div>
-            <div class="cal-d">6</div>
-            <div class="cal-d">7</div>
-            <div class="cal-d today">8</div> <!-- Dia atual destacado -->
-            <div class="cal-d">9</div>
-            <div class="cal-d">10</div>
-            <div class="cal-d">11</div>
-            <div class="cal-d">12</div>
-            <div class="cal-d">13</div>
-            <div class="cal-d">14</div>
-            <div class="cal-d">15</div>
-            <div class="cal-d">16</div>
-            <div class="cal-d">17</div>
-            <div class="cal-d">18</div>
-            <div class="cal-d">19</div>
-            <div class="cal-d">20</div>
-            <div class="cal-d">21</div>
-            <div class="cal-d">22</div>
-            <div class="cal-d">23</div>
-            <div class="cal-d">24</div>
-            <div class="cal-d">25</div>
-            <div class="cal-d">26</div>
-            <div class="cal-d">27</div>
-            <div class="cal-d">28</div>
-            <div class="cal-d">29</div>
-            <div class="cal-d">30</div>
-            <div class="cal-d">31</div>
-
-          </div>
-          <!-- /cal-grid -->
         </div>
         <!-- /card calendário -->
 
@@ -981,10 +909,19 @@
 </div>
 
 
-{{-- Carrega o JavaScript principal via helper do Laravel.
-     O arquivo home.js contém: navigate(), filtros de chip, busca em tempo real,
-     toggle de tarefas (pendente/concluída), abertura/fechamento do modal
-     por clique externo e tecla Escape, e demais interações da página. --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+        initialView: 'dayGridMonth',
+        locale: 'pt-br',
+        events: '/tasks/calendar-events',
+        eventClick: function(info) {
+            alert('Tarefa: ' + info.event.title);
+        }
+    });
+    calendar.render();
+});
+</script>
 <script src="{{ asset('js/home.js') }}"></script>
 
 

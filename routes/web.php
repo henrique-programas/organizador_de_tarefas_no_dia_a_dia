@@ -63,4 +63,17 @@ Route::middleware('auth')->group(function () {
     Route::resource('tasks', TaskController::class);
 });
 
+Route::get('/tasks/calendar-events', function(){
+    $tasks = auth()->user()->tasks()->whereNotNull('due_date')->get();
+
+    $events = $tasks->map(function ($task) {
+        return[
+            'id' => $task->id,
+            'title' => $task->title,
+            'start' => $task->due_date,
+            'color' => $task->completed ? '#10B981' : '#3B82F6',
+        ];
+    });
+});
+
 require __DIR__.'/auth.php';
