@@ -468,7 +468,7 @@
       @if($tasks->where('completed', false)->count() > 0)
         <div class="tasks-grid">
           @foreach($tasks->where('completed', false) as $task)
-            <div class="task-item" data-type="{{ $task->type }}">
+            <div class="task-item priority-{{ $task->priority }}" data-type="{{ $task->type }}">
               <div class="ti-top">
                 <div class="ti-name">{{ $task->title }}</div>
                 <form action="{{ route('tasks.update', $task) }}" method="POST">
@@ -477,17 +477,30 @@
                   <input type="hidden" name="description" value="{{ $task->description }}">
                   <input type="hidden" name="completed" value="1">
                   <input type="hidden" name="type" value="{{ $task->type }}">
+                  <input type="hidden" name="priority" value="{{ $task->priority }}">
                   <button type="submit" class="ti-check" title="Marcar como concluída">
                     <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                   </button>
                 </form>
               </div>
               <div class="ti-desc">{{ $task->description ?? 'Sem descrição' }}</div>
+              <div style="display:flex;gap:6px;margin-bottom:8px;">
+                <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--blue-xlight);color:var(--blue-primary);">
+                  {{ ucfirst($task->type) }}
+                </span>
+                @if($task->priority === 'alta')
+                  <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#FEE2E2;color:#DC2626;">Alta</span>
+                @elseif($task->priority === 'media')
+                  <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#FEF3C7;color:#D97706;">Média</span>
+                @else
+                  <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#D1FAE5;color:#059669;">Baixa</span>
+                @endif
+              </div>
               <div class="ti-footer">
                 <span class="ti-due">{{ $task->created_at->format('d/m/Y') }}</span>
                 <div style="display:flex;gap:6px">
                   <button type="button" 
-                    onclick="openEdit({{ $task->id }}, '{{ addslashes($task->title) }}', '{{ addslashes($task->description) }}', {{ $task->completed ? 'true' : 'false' }}, '{{ $task->type }}')"
+                    onclick="openEdit({{ $task->id }}, '{{ addslashes($task->title) }}', '{{ addslashes($task->description) }}', {{ $task->completed ? 'true' : 'false' }}, '{{ $task->type }}', '{{ $task->priority }}')"
                     style="font-size:11px;color:var(--blue-primary);background:none;border:none;cursor:pointer;">
                     Editar
                   </button>
@@ -517,7 +530,7 @@
       @if($tasks->where('completed', true)->count() > 0)
         <div class="tasks-grid">
           @foreach($tasks->where('completed', true) as $task)
-            <div class="task-item done" data-type="{{ $task->type }}">
+            <div class="task-item done priority-{{ $task->priority }}" data-type="{{ $task->type }}">
               <div class="ti-top">
                 <div class="ti-name">{{ $task->title }}</div>
                 <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--blue-xlight);color:var(--blue-primary);">
@@ -528,12 +541,25 @@
                   <input type="hidden" name="title" value="{{ $task->title }}">
                   <input type="hidden" name="description" value="{{ $task->description }}">
                   <input type="hidden" name="type" value="{{ $task->type }}">
+                  <input type="hidden" name="priority" value="{{ $task->priority }}">
                   <button type="submit" class="ti-check checked" title="Desmarcar tarefa">
                     <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                   </button>
                 </form>
               </div>
               <div class="ti-desc">{{ $task->description ?? 'Sem descrição' }}</div>
+              <div style="display:flex;gap:6px;margin-bottom:8px;">
+                  <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--blue-xlight);color:var(--blue-primary);">
+                    {{ ucfirst($task->type) }}
+                  </span>
+                  @if($task->priority === 'alta')
+                    <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#FEE2E2;color:#DC2626;">Alta</span>
+                  @elseif($task->priority === 'media')
+                    <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#FEF3C7;color:#D97706;">Média</span>
+                  @else
+                    <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#D1FAE5;color:#059669;">Baixa</span>
+                  @endif
+                </div>
               <div class="ti-footer">
                 <span class="ti-due">{{ $task->created_at->format('d/m/Y') }}</span>
                 <form action="{{ route('tasks.destroy', $task) }}" method="POST">
@@ -859,10 +885,10 @@
         <!-- Select: nível de prioridade da tarefa -->
         <div class="form-group">
           <label>Prioridade</label>
-          <select>
-            <option>Alta</option>
-            <option>Média</option>
-            <option>Baixa</option>
+          <select name="priority" id="create-priority">
+            <option value="alta">Alta</option>
+            <option value="media">Média</option>
+            <option value="baixa">Baixa</option>
           </select>
         </div>
       </div>
@@ -926,6 +952,14 @@
           <option value="diaria">Diária</option>
           <option value="semanal">Semanal</option>
           <option value="mensal">Mensal</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Prioridade</label>
+        <select name="priority" id="edit-priority">
+          <option value="alta">Alta</option>
+          <option value="media">Média</option>
+          <option value="baixa">Baixa</option>
         </select>
       </div>
       <div class="form-group" style="flex-direction:row;align-items:center;gap:8px;">

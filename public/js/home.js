@@ -8,11 +8,12 @@ function navigate(p){
 document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('modal').classList.remove('open');});
 
-function openEdit(id, title, description, completed, type) {
+function openEdit(id, title, description, completed, type, priority) {
   document.getElementById('edit-title').value = title;
   document.getElementById('edit-type').value = type;
   document.getElementById('edit-description').value = description;
   document.getElementById('edit-completed').checked = completed;
+  document.getElementById('edit-priority').value = priority;
   document.getElementById('form-edit').action = '/tasks/' + id;
   document.getElementById('modal-edit').classList.add('open');
 }
@@ -41,5 +42,15 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
         item.style.display = (type === filter) ? '' : 'none';
       }
     });
+  });
+});
+
+// Busca em tempo real por nome de tarefa
+document.querySelector('.search-box input').addEventListener('input', function() {
+  const search = this.value.trim().toLowerCase();
+
+  document.querySelectorAll('.task-item').forEach(item => {
+    const name = item.querySelector('.ti-name').textContent.toLowerCase();
+    item.style.display = name.includes(search) ? '' : 'none';
   });
 });

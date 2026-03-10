@@ -211,3 +211,13 @@ select{padding:10px 14px;border:1.5px solid var(--gray-border);border-radius:10p
 select:focus{border-color:var(--blue-primary);}
 textarea{padding:10px 14px;border:1.5px solid var(--gray-border);border-radius:10px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);background:var(--white);outline:none;resize:vertical;min-height:80px;}
 textarea:focus{border-color:var(--blue-primary);}
+/* Borda colorida por prioridade */
+.task-item.priority-alta {
+  border-left: 4px solid #EF4444;
+}
+.task-item.priority-media {
+  border-left: 4px solid #F59E0B;
+}
+.task-item.priority-baixa {
+  border-left: 4px solid #10B981;
+}
