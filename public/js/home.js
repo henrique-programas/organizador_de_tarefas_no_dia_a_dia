@@ -8,12 +8,13 @@ function navigate(p){
 document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('modal').classList.remove('open');});
 
-function openEdit(id, title, description, completed, type, priority) {
+function openEdit(id, title, description, completed, type, priority, dueDate) {
   document.getElementById('edit-title').value = title;
   document.getElementById('edit-type').value = type;
   document.getElementById('edit-description').value = description;
   document.getElementById('edit-completed').checked = completed;
   document.getElementById('edit-priority').value = priority;
+  document.getElementById('edit-due_date').value = dueDate ?? '';
   document.getElementById('form-edit').action = '/tasks/' + id;
   document.getElementById('modal-edit').classList.add('open');
 }

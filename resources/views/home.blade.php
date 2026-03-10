@@ -429,7 +429,7 @@
                 <span class="ti-due">{{ $task->created_at->format('d/m/Y') }}</span>
                 <div style="display:flex;gap:6px">
                   <button type="button" 
-                    onclick="openEdit({{ $task->id }}, '{{ addslashes($task->title) }}', '{{ addslashes($task->description) }}', {{ $task->completed ? 'true' : 'false' }}, '{{ $task->type }}', '{{ $task->priority }}')"
+                    onclick="openEdit({{ $task->id }}, '{{ addslashes($task->title) }}', '{{ addslashes($task->description) }}', {{ $task->completed ? 'true' : 'false' }}, '{{ $task->type }}', '{{ $task->priority }}', '{{ $task->due_date }}')"
                     style="font-size:11px;color:var(--blue-primary);background:none;border:none;cursor:pointer;">
                     Editar
                   </button>
@@ -518,14 +518,28 @@
           Adicionar Tarefa
         </button>
         <!-- Marca todas as tarefas pendentes como concluídas de uma só vez -->
-        <button type="button" class="btn btn-outline">
-          <svg viewBox="0 0 24 24">
-            <path d="M9 11l3 3L22 4"/>
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-          </svg>
-          Marcar Todas
-        </button>
-      </div>
+        <form method="POST" action="{{ route('tasks.completeAll') }}">
+          @csrf
+          <button type="submit" class="btn btn-outline">
+            <svg viewBox="0 0 24 24">
+              <path d="M9 11l3 3L22 4"/>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+            Marcar Todas
+          </button>
+        </form>
+
+        <!-- Excluir todas as tarefas -->
+        <form method="POST" action="{{ route('tasks.destroyAll') }}" onsubmit="return confirm('Tem certeza? Isso apagará todas as tarefas!')">
+          @csrf @method('DELETE')
+          <button type="submit" class="btn btn-danger">
+            <svg viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+            Excluir Todas
+          </button>
+        </form>
 
     </div>
     <!-- /page-tarefas -->
@@ -826,7 +840,7 @@
       <!-- Campo: data limite para conclusão da tarefa -->
       <div class="form-group">
         <label>Data de Conclusão</label>
-        <input type="date"/>
+        <input type="date" name="due_date"/>
       </div>
 
       <!-- Ações do modal: cancelar (descarta) ou criar (salva) -->
@@ -890,6 +904,10 @@
           <option value="media">Média</option>
           <option value="baixa">Baixa</option>
         </select>
+      </div>
+      <div class="form-group">
+        <label>Data de Conclusão</label>
+        <input type="date" name="due_date" id="edit-due_date"/>
       </div>
       <div class="form-group" style="flex-direction:row;align-items:center;gap:8px;">
         <input type="checkbox" name="completed" id="edit-completed">

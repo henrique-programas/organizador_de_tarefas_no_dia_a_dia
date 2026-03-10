@@ -56,13 +56,6 @@ Route::get('/teste', function () {
     return 'funcionando!';
 });
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::resource('tasks', TaskController::class);
-});
-
 Route::get('/tasks/calendar-events', function(){
     $tasks = auth()->user()->tasks()->whereNotNull('due_date')->get();
 
@@ -74,6 +67,18 @@ Route::get('/tasks/calendar-events', function(){
             'color' => $task->completed ? '#10B981' : '#3B82F6',
         ];
     });
+
+    return response()->json($events);
+})->middleware(['auth', 'verified']);
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/tasks/complete-all', [TaskController::class, 'completeAll'])->name('tasks.completeAll');
+    Route::delete('/tasks/destroy-all', [TaskController::class, 'destroyAll'])->name('tasks.destroyAll');
+    Route::resource('tasks', TaskController::class);
 });
+
 
 require __DIR__.'/auth.php';

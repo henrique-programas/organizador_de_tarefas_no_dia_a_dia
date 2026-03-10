@@ -64,4 +64,16 @@ class TaskController extends Controller
 
         return redirect()->route('home')->with('success', 'Tarefa removida!');
     }
+
+    public function completeAll()
+    {
+       auth()->user()->tasks()->where('completed', false)->update(['completed' => true]);
+       return redirect()->route('home')->with('success', 'Todas as tarefas concluídas!');
+    }
+
+    public function destroyAll()
+    {
+       auth()->user()->tasks()->delete();
+       return redirect()->route('home')->with('success', 'Todas as tarefas excluídas!');
+    }
 }
