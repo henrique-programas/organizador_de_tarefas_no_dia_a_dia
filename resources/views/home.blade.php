@@ -219,60 +219,61 @@
 
         <!-- Card: Tarefa Diária — borda azul no topo via CSS .daily::before -->
         <div class="task-card daily">
-          <div class="tc-type">Tarefa Diária</div>           <!-- Rótulo do tipo -->
-          <div class="tc-name">Nome da tarefa</div>          <!-- Nome da tarefa -->
-          <div class="tc-desc">Descrição da tarefa aparece aqui.</div> <!-- Descrição curta -->
+          <div class="tc-type">Tarefa Diária</div>
+          <div class="tc-name">{{ $tarefaDiaria?->title ?? 'Nenhuma tarefa' }}</div>
+          <div class="tc-desc">{{ $tarefaDiaria?->description ?? 'Nenhuma tarefa diária cadastrada.' }}</div>
           <div class="tc-footer">
-            <!-- Barra de progresso: .prog-fill tem width% definido dinamicamente -->
             <div class="tc-prog">
               <div class="prog-bar">
-                <div class="prog-fill"></div>
+                <div class="prog-fill" style="width:{{ $taxaDiaria }}%"></div>
               </div>
-              <div class="prog-pct">0%</div> <!-- Percentual de conclusão -->
+              <div class="prog-pct">{{ $taxaDiaria }}%</div>
             </div>
-            <div class="tc-tag">Hoje</div>    <!-- Tag de prazo -->
+            <div class="tc-tag">Hoje</div>
           </div>
-          <!-- Hora/data prevista de conclusão -->
           <div class="tc-conclusion">
-            <span>Conclusão:</span><strong>—</strong>
+            <span>Status:</span>
+            <strong>{{ $tarefaDiaria?->completed ? 'Concluída' : 'Pendente' }}</strong>
           </div>
         </div>
 
         <!-- Card: Tarefa Semanal — borda verde no topo via CSS .weekly::before -->
         <div class="task-card weekly">
           <div class="tc-type">Tarefa Semanal</div>
-          <div class="tc-name">Nome da tarefa</div>
-          <div class="tc-desc">Descrição da tarefa aparece aqui.</div>
+          <div class="tc-name">{{ $tarefaSemanal?->title ?? 'Nenhuma tarefa' }}</div>
+          <div class="tc-desc">{{ $tarefaSemanal?->description ?? 'Nenhuma tarefa semanal cadastrada.' }}</div>
           <div class="tc-footer">
             <div class="tc-prog">
               <div class="prog-bar">
-                <div class="prog-fill"></div>
+                <div class="prog-fill" style="width:{{ $taxaSemanal }}%"></div>
               </div>
-              <div class="prog-pct">0%</div>
+              <div class="prog-pct">{{ $taxaSemanal }}%</div>
             </div>
             <div class="tc-tag">Esta semana</div>
           </div>
           <div class="tc-conclusion">
-            <span>Conclusão:</span><strong>—</strong>
+            <span>Status:</span>
+            <strong>{{ $tarefaSemanal?->completed ? 'Concluída' : 'Pendente' }}</strong>
           </div>
         </div>
 
         <!-- Card: Tarefa Mensal — borda amarela no topo via CSS .monthly::before -->
         <div class="task-card monthly">
           <div class="tc-type">Tarefa Mensal</div>
-          <div class="tc-name">Nome da tarefa</div>
-          <div class="tc-desc">Descrição da tarefa aparece aqui.</div>
+          <div class="tc-name">{{ $tarefaMensal?->title ?? 'Nenhuma tarefa' }}</div>
+          <div class="tc-desc">{{ $tarefaMensal?->description ?? 'Nenhuma tarefa mensal cadastrada.' }}</div>
           <div class="tc-footer">
             <div class="tc-prog">
               <div class="prog-bar">
-                <div class="prog-fill"></div>
+                <div class="prog-fill" style="width:{{ $taxaMensal }}%"></div>
               </div>
-              <div class="prog-pct">0%</div>
+              <div class="prog-pct">{{ $taxaMensal }}%</div>
             </div>
             <div class="tc-tag">Este mês</div>
           </div>
           <div class="tc-conclusion">
-            <span>Conclusão:</span><strong>—</strong>
+            <span>Status:</span>
+            <strong>{{ $tarefaMensal?->completed ? 'Concluída' : 'Pendente' }}</strong>
           </div>
         </div>
 
