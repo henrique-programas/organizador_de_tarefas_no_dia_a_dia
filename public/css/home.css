@@ -221,3 +221,14 @@ textarea:focus{border-color:var(--blue-primary);}
 .task-item.priority-baixa {
   border-left: 4px solid #10B981;
 }
+.streak-d.done {
+    background: #10B981;
+    color: white;
+    border-color: #10B981;
+}
+
+.streak-d.partial {
+    background: #FEF3C7;
+    color: #D97706;
+    border-color: #D97706;
+}

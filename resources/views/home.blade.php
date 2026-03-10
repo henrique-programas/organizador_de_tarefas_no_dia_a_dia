@@ -274,21 +274,35 @@
           </div>
           <!-- Lista de eventos/ações recentes — itens inseridos dinamicamente via JS -->
           <div class="activity-list">
-            <!-- Estado vazio: visível enquanto não há atividades registradas -->
-            <div class="activity-item">
-              <div class="act-dot">
-                <!-- Ícone de relógio representando ausência de atividade -->
-                <svg viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
+            @forelse($atividadesRecentes as $ativ)
+              <div class="activity-item">
+                <div class="act-dot" style="background:{{ $ativ['cor'] }}1a;color:{{ $ativ['cor'] }}">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M9 11l3 3L22 4"/>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                  </svg>
+                </div>
+                <div class="act-text">
+                  <strong>{{ $ativ['titulo'] }}</strong>
+                  <span>{{ $ativ['acao'] }}</span>
+                </div>
+                <div class="act-time">{{ $ativ['tempo'] }}</div>
               </div>
-              <div class="act-text">
-                <strong>Sem atividades ainda</strong>
-                <span>As atividades aparecerão aqui</span>
+            @empty
+              <div class="activity-item">
+                <div class="act-dot">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                </div>
+                <div class="act-text">
+                  <strong>Sem atividades ainda</strong>
+                  <span>As atividades aparecerão aqui</span>
+                </div>
+                <div class="act-time">—</div>
               </div>
-              <div class="act-time">—</div>
-            </div>
+            @endforelse
           </div>
         </div>
         <!-- /card atividade recente -->
@@ -758,13 +772,11 @@
             <!-- Barra de streak: cada bloco = 1 dia da semana
                  Classes aplicadas via JS: .done (ativo), .partial (parcial), sem classe (inativo) -->
             <div class="streak-bar">
-              <div class="streak-d">Seg</div>
-              <div class="streak-d">Ter</div>
-              <div class="streak-d">Qua</div>
-              <div class="streak-d">Qui</div>
-              <div class="streak-d">Sex</div>
-              <div class="streak-d">Sáb</div>
-              <div class="streak-d">Dom</div>
+              @foreach($atividadeSemanal as $dia)
+                <div class="streak-d {{ $dia['status'] === 'completo' ? 'done' : ($dia['status'] === 'parcial' ? 'partial' : '') }}">
+                  {{ $dia['dia'] }}
+                </div>
+              @endforeach
             </div>
           </div>
           <!-- /card atividade semanal -->

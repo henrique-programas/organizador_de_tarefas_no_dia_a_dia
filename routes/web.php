@@ -9,7 +9,7 @@ Route::get('/home', function () {
     $tasks = auth()->user()->tasks()->latest()->get();
     $total = $tasks->count();
     $concluidas = $tasks->where('completed', true)->count();
-    $pendentes  = $tasks->where('completed', false)->count();
+    $pendentes = $tasks->where('completed', false)->count();
     $taxa = $total > 0 ? round(($concluidas / $total) * 100) : 0;
 
     $tarefaDiaria  = auth()->user()->tasks()->where('type', 'diaria')->where('completed', false)->latest()->first()
@@ -22,13 +22,13 @@ Route::get('/home', function () {
                   ?? auth()->user()->tasks()->where('type', 'mensal')->latest()->first();
     
     // Separando as tarefas por tipo em sub-collections
-    $diarias  = $tasks->where('type', 'diaria');
+    $diarias = $tasks->where('type', 'diaria');
     $semanais = $tasks->where('type', 'semanal');
-    $mensais  = $tasks->where('type', 'mensal');
+    $mensais = $tasks->where('type', 'mensal');
     
     $totalDiarias = $diarias->count();
     $totalSemanal = $semanais->count();
-    $totalMensal  = $mensais->count();
+    $totalMensal = $mensais->count();
     
     // Pendentes por tipo (novo — pode usar no blade se quiser)
     $pendentesDiarias  = $diarias->where('completed', false)->count();
@@ -66,6 +66,32 @@ Route::get('/home', function () {
         $streak++;
         $dia->subDay();
     }
+
+    $atividadesRecentes = $tasks->sortByDesc('updated_at')->take(5)->map(function ($task) {
+        return [
+            'titulo' => $task->title,
+            'acao' => $task->completed ? 'Concluída' : 'Criada',
+            'cor' => $task->completed ? '#10B981' : '#3B82F6',
+            'tempo' => $task->updated_at->diffForHumans(),
+        ];
+    });
+
+    $atividadeSemanal = collect(range(6, 0))->map(function ($diasAtras) use ($tasks) {
+    $dia = now()->subDays($diasAtras)->toDateString();
+
+    $criadas   = $tasks->filter(fn($t) => $t->created_at->toDateString() === $dia)->count();
+    $concluidas = $tasks->filter(fn($t) => $t->completed && $t->updated_at->toDateString() === $dia)->count();
+
+    $status = 'inativo';
+    if ($criadas > 0 && $concluidas > 0) $status = 'completo';
+    elseif ($criadas > 0 || $concluidas > 0) $status = 'parcial';
+
+    return [
+        'dia' => now()->subDays($diasAtras)->locale('pt_BR')->isoFormat('ddd'),
+        'status' => $status,
+    ];
+
+    });
     
     return view('home', compact(
         'tasks', 'total', 'concluidas', 'pendentes', 'taxa',
@@ -73,7 +99,8 @@ Route::get('/home', function () {
         'totalDiarias', 'totalSemanal', 'totalMensal',
         'taxaDiaria', 'taxaSemanal', 'taxaMensal',
         'pendentesDiarias', 'pendentesSemanaias', 'pendentesMensais',
-        'tarefasEsteMes', 'concluidasNoPrazo', 'streak' // ← faltava isso
+        'tarefasEsteMes', 'concluidasNoPrazo', 'streak', 'atividadesRecentes',
+        'atividadeSemanal'
     ));
 })->middleware(['auth', 'verified'])->name('home');
 
