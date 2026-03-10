@@ -1,0 +1,470 @@
+/* ============================================================
+   home-responsive.css
+   Adicione este arquivo APÓS o home.css no seu blade:
+   <link rel="stylesheet" href="{{ asset('css/home_responsive.css') }}">
+   ============================================================ */
+
+/* Hambúrguer oculto por padrão — só aparece no mobile via media query */
+.menu-toggle {
+  display: none;
+}
+
+/* Botão de tema na sidebar */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: all .18s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.theme-toggle:hover {
+  background: var(--blue-xlight);
+  color: var(--blue-primary);
+}
+.theme-toggle svg {
+  width: 17px;
+  height: 17px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════
+   TABLET — até 1024px
+══════════════════════════════════════════ */
+@media (max-width: 1024px) {
+
+  .sidebar {
+    width: 180px;
+    padding: 16px 8px;
+  }
+
+  .stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-top {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .home-top .task-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .home-bottom {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ══════════════════════════════════════════
+   MOBILE — até 768px
+══════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  .topbar {
+    padding: 0 16px;
+    height: 56px;
+  }
+
+  .menu-toggle {
+    display: flex;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.2);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    order: -1;
+  }
+  .menu-toggle svg {
+    width: 20px;
+    height: 20px;
+    stroke: white;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .layout {
+    flex-direction: column;
+    min-height: calc(100vh - 56px);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    height: calc(100vh - 56px);
+    width: 240px;
+    z-index: 150;
+    transform: translateX(-100%);
+    transition: transform .3s cubic-bezier(.22,1,.36,1);
+    box-shadow: 4px 0 24px rgba(0,0,0,.12);
+    overflow-y: auto;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    top: 56px;
+    background: rgba(15,23,42,.4);
+    z-index: 140;
+    backdrop-filter: blur(2px);
+  }
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+  .main {
+    padding: 16px;
+    width: 100%;
+  }
+
+  .stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .home-top {
+    grid-template-columns: 1fr;
+  }
+
+  .home-top .task-card:last-child {
+    grid-column: auto;
+  }
+
+  .home-bottom {
+    grid-template-columns: 1fr;
+  }
+
+  .tasks-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tasks-toolbar .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .search-box {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .filter-chips-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    width: 100%;
+  }
+  .filter-chips-row::-webkit-scrollbar { display: none; }
+  .filter-chips-row .filter-chip {
+    flex-shrink: 0;
+  }
+
+  .tasks-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tasks-actions {
+    flex-direction: column;
+  }
+
+  .tasks-actions .btn,
+  .tasks-actions form .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  #calendar {
+    font-size: 11px;
+  }
+
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 15px;
+  }
+
+  .fc .fc-daygrid-day {
+    min-height: 32px;
+  }
+
+  .fc .fc-daygrid-day-number {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+
+  .fc-event-title {
+    font-size: 9px;
+  }
+
+  .fc .fc-col-header-cell-cushion {
+    font-size: 10px;
+    padding: 4px 2px;
+  }
+
+  .fc {
+    overflow: hidden;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .donut-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .modal {
+    width: 95vw;
+    padding: 20px 16px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-row {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+/* ══════════════════════════════════════════
+   MOBILE PEQUENO — até 480px
+══════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  .brand span {
+    font-size: 15px;
+  }
+
+  .stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .stat-box {
+    padding: 14px 10px;
+  }
+
+  .stat-num {
+    font-size: 22px;
+  }
+
+  .page-header h1 {
+    font-size: 18px;
+  }
+
+  .perf-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .streak-d {
+    font-size: 8px;
+    height: 24px;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 13px;
+  }
+
+  .fc .fc-daygrid-day-number {
+    font-size: 9px;
+  }
+
+  .fc .fc-col-header-cell-cushion {
+    font-size: 9px;
+    padding: 2px 1px;
+  }
+}
+
+
+/* ══════════════════════════════════════════
+   TEMA ESCURO
+   Ativado pela classe .dark no <body>.
+   O JS alterna a classe e salva no localStorage.
+══════════════════════════════════════════ */
+
+body.dark {
+  --white: #1E293B;
+  --gray-light: #0F172A;
+  --gray-border: #334155;
+  --text: #F1F5F9;
+  --text-soft: #94A3B8;
+  --blue-xlight: #1E3A5F;
+  --blue-light: #3B82F6;
+  background: var(--gray-light);
+  color: var(--text);
+}
+
+body.dark .topbar {
+  background: linear-gradient(135deg, #1E3A5F, #0F172A);
+  box-shadow: 0 2px 16px rgba(0,0,0,.5);
+}
+
+body.dark .sidebar {
+  background: #1E293B;
+  border-right-color: #334155;
+}
+body.dark .sidebar-bottom {
+  border-top-color: #334155;
+}
+body.dark .nav-item:hover,
+body.dark .nav-item.active {
+  background: #1E3A5F;
+  color: #93C5FD;
+}
+body.dark .theme-toggle:hover {
+  background: #1E3A5F;
+  color: #93C5FD;
+}
+
+body.dark .card,
+body.dark .stat-box,
+body.dark .task-card,
+body.dark .task-item,
+body.dark .chart-area,
+body.dark .profile-card,
+body.dark .danger-zone {
+  background: #1E293B;
+  border-color: #334155;
+}
+body.dark .perf-item {
+  background: #0F172A;
+}
+
+body.dark input,
+body.dark select,
+body.dark textarea {
+  background: #0F172A;
+  border-color: #334155;
+  color: #F1F5F9;
+}
+body.dark input:focus,
+body.dark select:focus,
+body.dark textarea:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.2);
+}
+
+body.dark .modal {
+  background: #1E293B;
+  border: 1px solid #334155;
+}
+body.dark .modal-overlay {
+  background: rgba(0,0,0,.7);
+}
+body.dark .modal-close {
+  background: #0F172A;
+}
+body.dark .modal-close:hover {
+  background: #334155;
+}
+
+body.dark .activity-item {
+  background: #0F172A;
+}
+
+body.dark .btn-outline {
+  background: #1E293B;
+  border-color: #334155;
+  color: #93C5FD;
+}
+body.dark .btn-outline:hover {
+  background: #1E3A5F;
+  border-color: #3B82F6;
+}
+body.dark .btn-danger {
+  background: #1E293B;
+  border-color: #7F1D1D;
+  color: #FCA5A5;
+}
+body.dark .btn-danger:hover {
+  background: #450A0A;
+}
+
+body.dark .danger-zone {
+  border-color: #7F1D1D;
+}
+
+body.dark .prog-bar {
+  background: #334155;
+}
+
+body.dark .empty-state {
+  border-color: #334155;
+}
+
+body.dark .sidebar-overlay {
+  background: rgba(0,0,0,.6);
+}
+
+body.dark ::-webkit-scrollbar {
+  width: 6px;
+}
+body.dark ::-webkit-scrollbar-track {
+  background: #0F172A;
+}
+body.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+
+/* ── VLibras ── */
+/* Garante que o widget não quebre o layout */
+[vw-plugin-wrapper] {
+  z-index: 9999 !important;
+}
+
+/* Cor do botão quando VLibras está ativo no dark mode */
+body.dark #vlibras-toggle {
+  color: var(--text-soft);
+}
+body.dark #vlibras-toggle:hover {
+  background: #1E3A5F;
+  color: #93C5FD;
+}

@@ -7,10 +7,19 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>TaskFlow</title>
   <link rel="stylesheet" href="{{ asset('css/home.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/home_responsive.css') }}">
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
+
+<!-- Container obrigatório do VLibras -->
+<div vw class="enabled" id="vlibras-container" style="display:none">
+  <div vw-access-button class="active"></div>
+  <div vw-plugin-wrapper>
+    <div class="vw-plugin-top-wrapper"></div>
+  </div>
+</div>
 
 
 <!-- ════════════════════════════════════════════
@@ -19,6 +28,15 @@
      Contém: logotipo do sistema, botão de notificações e avatar do usuário.
 ════════════════════════════════════════════ -->
 <div class="topbar">
+
+  <!-- Botão hambúrguer — visibilidade controlada pelo CSS (só aparece no mobile) -->
+  <button id="menu-toggle" class="menu-toggle">
+    <svg viewBox="0 0 24 24">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
 
   <!-- Logotipo: ícone SVG + nome do sistema -->
   <div class="brand">
@@ -47,15 +65,24 @@
       <div class="notif-dot"></div>
     </div>
 
-    <!-- Avatar do usuário exibindo as iniciais (ex: "JS" = João Silva) -->
-    <div class="avatar-btn">
-      {{ strtoupper(substr(Auth::user()->name,0,2)) }}
-    </div>
+    <!-- Avatar do usuário — exibe foto de perfil se existir, senão as iniciais -->
+    <button class="avatar-btn" id="nav-perfil" onclick="navigate('perfil')">
+      @if(Auth::user()->avatar)
+        <img src="{{ Storage::url(Auth::user()->avatar) }}"
+             alt="{{ Auth::user()->name }}"
+             style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" />
+      @else
+        {{ strtoupper(substr(Auth::user()->name,0,2)) }}
+      @endif
+    </button>
 
   </div>
 </div>
 <!-- /TOPBAR -->
 
+
+<!-- Overlay escuro que aparece atrás da sidebar no mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 
 <!-- ════════════════════════════════════════════
      LAYOUT PRINCIPAL
@@ -110,6 +137,26 @@
 
     <!-- Rótulo da seção de filtros rápidos -->
     <div class="sidebar-label">Configurações</div>
+
+    <!-- Botão de alternar tema claro/escuro -->
+    <button class="theme-toggle" id="theme-toggle">
+      <svg id="theme-icon" viewBox="0 0 24 24">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+      <span id="theme-label">Tema Escuro</span>
+    </button>
+
+    <!-- Botão de ativar/desativar VLibras -->
+    <button class="theme-toggle" id="vlibras-toggle">
+      <svg id="vlibras-icon" viewBox="0 0 24 24">
+        <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+        <line x1="6" y1="1" x2="6" y2="4"/>
+        <line x1="10" y1="1" x2="10" y2="4"/>
+        <line x1="14" y1="1" x2="14" y2="4"/>
+      </svg>
+      <span id="vlibras-label">VLibras</span>
+    </button>
 
     <!-- Rodapé da sidebar: botão de logout destacado em vermelho -->
     <div class="sidebar-bottom">
@@ -257,9 +304,7 @@
             </svg>
             Calendário de Tarefas
           </div>
-
           <div id="calendar"></div>
-
         </div>
         <!-- /card calendário -->
 
@@ -316,13 +361,9 @@
 
     <!-- ════════════════════════════════════════════
          PÁGINA: TAREFAS
-         Oculta por padrão; ativada pela navegação.
-         Seções: toolbar (busca + filtros), lista de pendentes,
-         lista de concluídas e botões de ação.
     ════════════════════════════════════════════ -->
     <div class="page" id="page-tarefas">
 
-      <!-- Título e subtítulo da página -->
       <div class="page-header">
         <h1>Página de Tarefas</h1>
         <p>Gerencie e acompanhe todas as suas tarefas.</p>
@@ -337,7 +378,6 @@
       <!-- ── Barra de ferramentas: busca, filtros e botão de criar ── -->
       <div class="tasks-toolbar">
 
-        <!-- Campo de busca com ícone de lupa decorativo posicionado via CSS -->
         <div class="search-box">
           <svg viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8"/>
@@ -346,16 +386,15 @@
           <input type="text" placeholder="Buscar tarefa..."/>
         </div>
 
-        <!-- Chips de filtro por tipo de periodicidade -->
-        <div class="filter-chip active">Todas</div>    <!-- Ativo por padrão -->
-        <div class="filter-chip">Diárias</div>
-        <div class="filter-chip">Semanais</div>
-        <div class="filter-chip">Mensais</div>
+        <!-- Chips de filtro em wrapper com scroll horizontal no mobile -->
+        <div class="filter-chips-row">
+          <div class="filter-chip active">Todas</div>
+          <div class="filter-chip">Diárias</div>
+          <div class="filter-chip">Semanais</div>
+          <div class="filter-chip">Mensais</div>
+        </div>
 
-        <!-- Botão que abre o modal de criação de nova tarefa -->
-        <!-- Adiciona a classe .open ao overlay #modal via JS inline -->
         <button type="button" class="btn btn-primary" onclick="document.getElementById('modal').classList.add('open')">
-          <!-- Ícone de + (adicionar) -->
           <svg viewBox="0 0 24 24">
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
@@ -368,11 +407,9 @@
 
 
       <!-- ── Seção: Tarefas Pendentes ── -->
-      <!-- Badge .count exibe a contagem de itens e é atualizado via JS -->
       <div class="tasks-section-title">
         Tarefas Pendentes <span class="count">{{ $pendentes }}</span>
       </div>
-      <!-- Estado vazio: visível quando não há tarefas pendentes cadastradas -->
       @if($tasks->where('completed', false)->count() > 0)
         <div class="tasks-grid">
           @foreach($tasks->where('completed', false) as $task)
@@ -404,7 +441,7 @@
               <div class="ti-footer">
                 <span class="ti-due">{{ $task->created_at->format('d/m/Y') }}</span>
                 <div style="display:flex;gap:6px">
-                  <button type="button" 
+                  <button type="button"
                     onclick="openEdit({{ $task->id }}, '{{ addslashes($task->title) }}', '{{ addslashes($task->description) }}', {{ $task->completed ? 'true' : 'false' }}, '{{ $task->type }}', '{{ $task->priority }}', '{{ $task->due_date }}')"
                     style="font-size:11px;color:var(--blue-primary);background:none;border:none;cursor:pointer;">
                     Editar
@@ -427,11 +464,9 @@
 
 
       <!-- ── Seção: Tarefas Concluídas ── -->
-      <!-- Badge .count.done usa cor verde para diferenciar do badge de pendentes -->
       <div class="tasks-section-title">
         Tarefas Concluídas <span class="count done">{{ $concluidas }}</span>
       </div>
-      <!-- Estado vazio: visível quando nenhuma tarefa foi concluída ainda -->
       @if($tasks->where('completed', true)->count() > 0)
         <div class="tasks-grid">
           @foreach($tasks->where('completed', true) as $task)
@@ -454,17 +489,17 @@
               </div>
               <div class="ti-desc">{{ $task->description ?? 'Sem descrição' }}</div>
               <div style="display:flex;gap:6px;margin-bottom:8px;">
-                  <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--blue-xlight);color:var(--blue-primary);">
-                    {{ ucfirst($task->type) }}
-                  </span>
-                  @if($task->priority === 'alta')
-                    <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#FEE2E2;color:#DC2626;">Alta</span>
-                  @elseif($task->priority === 'media')
-                    <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#FEF3C7;color:#D97706;">Média</span>
-                  @else
-                    <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#D1FAE5;color:#059669;">Baixa</span>
-                  @endif
-                </div>
+                <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--blue-xlight);color:var(--blue-primary);">
+                  {{ ucfirst($task->type) }}
+                </span>
+                @if($task->priority === 'alta')
+                  <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#FEE2E2;color:#DC2626;">Alta</span>
+                @elseif($task->priority === 'media')
+                  <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#FEF3C7;color:#D97706;">Média</span>
+                @else
+                  <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#D1FAE5;color:#059669;">Baixa</span>
+                @endif
+              </div>
               <div class="ti-footer">
                 <span class="ti-due">{{ $task->created_at->format('d/m/Y') }}</span>
                 <form action="{{ route('tasks.destroy', $task) }}" method="POST">
@@ -485,7 +520,6 @@
 
       <!-- ── Ações globais da página de tarefas ── -->
       <div class="tasks-actions">
-        <!-- Abre o modal para criar uma nova tarefa -->
         <button class="btn btn-primary" onclick="document.getElementById('modal').classList.add('open')">
           <svg viewBox="0 0 24 24">
             <line x1="12" y1="5" x2="12" y2="19"/>
@@ -493,7 +527,6 @@
           </svg>
           Adicionar Tarefa
         </button>
-        <!-- Marca todas as tarefas pendentes como concluídas de uma só vez -->
         <form method="POST" action="{{ route('tasks.completeAll') }}">
           @csrf
           <button type="submit" class="btn btn-outline">
@@ -504,8 +537,6 @@
             Marcar Todas
           </button>
         </form>
-
-        <!-- Excluir todas as tarefas -->
         <form method="POST" action="{{ route('tasks.destroyAll') }}" onsubmit="return confirm('Tem certeza? Isso apagará todas as tarefas!')">
           @csrf @method('DELETE')
           <button type="submit" class="btn btn-danger">
@@ -524,10 +555,6 @@
 
     <!-- ════════════════════════════════════════════
          PÁGINA: PERFIL
-         Oculta por padrão; ativada pela navegação.
-         Layout em 2 colunas:
-           - Esquerda: dados pessoais, formulário de edição e zona de perigo
-           - Direita: gráfico de desempenho, estatísticas e atividade semanal
     ════════════════════════════════════════════ -->
     <div class="page" id="page-perfil">
 
@@ -551,24 +578,20 @@
         </div>
       @endif
 
-      <!-- Título e subtítulo da página -->
       <div class="page-header">
         <h1>Página de Perfil</h1>
         <p>Gerencie suas informações e veja seu desempenho.</p>
       </div>
 
-      <!-- Grade de 2 colunas do perfil -->
       <div class="profile-grid">
 
-
-        <!-- ── COLUNA ESQUERDA: dados pessoais e ações ── -->
+        <!-- ── COLUNA ESQUERDA ── -->
         <div class="profile-left">
 
-          <!-- Card: avatar, nome, e-mail e botões de ação rápida -->
           <div class="profile-card card">
             <div class="profile-avatar">
               @if(Auth::user()->avatar)
-                <img src="{{ Storage::url(Auth::user()->avatar) }}" 
+                <img src="{{ Storage::url(Auth::user()->avatar) }}"
                      style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
               @else
                 {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
@@ -594,9 +617,7 @@
               </form>
             </div>
           </div>
-          <!-- /profile-card -->
 
-          <!-- Card: formulário para editar as informações da conta -->
           <div class="card">
             <div class="card-title">
               <svg viewBox="0 0 24 24">
@@ -605,8 +626,6 @@
               Editar Informações
             </div>
             <div class="edit-form">
-
-              <!-- Formulário: nome e email -->
               <form method="POST" action="{{ route('profile.update') }}">
                 @csrf @method('PATCH')
                 <div class="form-group">
@@ -620,7 +639,6 @@
                 <button type="submit" class="btn btn-primary" style="margin-top:4px">Salvar Alterações</button>
               </form>
 
-              <!-- Formulário separado: senha -->
               <form method="POST" action="{{ route('password.update') }}" style="margin-top:16px">
                 @csrf @method('PUT')
                 <div class="form-group">
@@ -637,12 +655,9 @@
                 </div>
                 <button type="submit" class="btn btn-primary" style="margin-top:4px">Alterar Senha</button>
               </form>
-
             </div>
           </div>
-          <!-- /card editar informações -->
 
-          <!-- Bloco de ações destrutivas/irreversíveis da conta -->
           <div class="danger-zone">
             <div class="danger-title">Zona de Perigo</div>
             <div class="danger-desc">Estas ações são irreversíveis. Tenha certeza antes de prosseguir.</div>
@@ -661,32 +676,24 @@
               </button>
             </form>
           </div>
-          <!-- /danger-zone -->
 
         </div>
         <!-- /profile-left -->
 
 
-        <!-- ── COLUNA DIREITA: gráficos e estatísticas de desempenho ── -->
+        <!-- ── COLUNA DIREITA ── -->
         <div class="profile-right">
 
-          <!-- Card: gráfico de rosca (donut) com distribuição das tarefas por status -->
           <div class="chart-area">
             <div class="chart-title">Gráfico de Desempenho</div>
             <div class="chart-sub">Distribuição de tarefas por status</div>
-            <!-- Wrapper com o SVG do gráfico e a legenda lado a lado -->
             <div class="donut-wrap">
-
-              <!-- Gráfico SVG de rosca — arcos coloridos renderizados dinamicamente via JS -->
               <svg width="160" height="160" viewBox="0 0 160 160">
                 @if($total > 0)
-                  {{-- Azul: círculo completo de fundo --}}
                   <circle cx="80" cy="80" r="60" fill="none"
                     stroke="#3B82F6"
                     stroke-width="22"
                     stroke-dasharray="376.99 0"/>
-
-                  {{-- Verde: arco proporcional às concluídas --}}
                   <circle cx="80" cy="80" r="60" fill="none"
                     stroke="#10B981"
                     stroke-width="22"
@@ -698,7 +705,6 @@
                 <text x="80" y="76" text-anchor="middle" font-family="Sora,sans-serif" font-size="18" font-weight="700" fill="var(--text-soft)">{{ $taxa }}%</text>
                 <text x="80" y="94" text-anchor="middle" font-family="Sora,sans-serif" font-size="10" fill="var(--text-soft)">conclusão</text>
               </svg>
-              
               <div class="donut-legend">
                 <div class="legend-item">
                   <div class="legend-dot" style="background:var(--success)"></div>
@@ -722,17 +728,11 @@
                   </div>
                 </div>
               </div>
-              <!-- /donut-legend -->
-
             </div>
-            <!-- /donut-wrap -->
           </div>
-          <!-- /chart-area -->
 
-          <!-- Card: estatísticas numéricas de desempenho em grade 2×2 -->
           <div class="card">
             <div class="card-title">
-              <!-- Ícone de pulso/atividade -->
               <svg viewBox="0 0 24 24">
                 <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
               </svg>
@@ -753,12 +753,9 @@
               </div>
             </div>
           </div>
-          <!-- /card estatísticas -->
 
-          <!-- Card: barra de atividade dos últimos 7 dias (streak semanal) -->
           <div class="card">
             <div class="card-title">
-              <!-- Ícone de calendário -->
               <svg viewBox="0 0 24 24">
                 <rect x="3" y="4" width="18" height="18" rx="2"/>
                 <line x1="16" y1="2" x2="16" y2="6"/>
@@ -767,10 +764,7 @@
               </svg>
               Atividade Semanal
             </div>
-            <!-- Subtítulo do período exibido -->
             <div style="font-size:11px;color:var(--text-soft);margin-bottom:10px;">Últimos 7 dias</div>
-            <!-- Barra de streak: cada bloco = 1 dia da semana
-                 Classes aplicadas via JS: .done (ativo), .partial (parcial), sem classe (inativo) -->
             <div class="streak-bar">
               @foreach($atividadeSemanal as $dia)
                 <div class="streak-d {{ $dia['status'] === 'completo' ? 'done' : ($dia['status'] === 'parcial' ? 'partial' : '') }}">
@@ -779,7 +773,6 @@
               @endforeach
             </div>
           </div>
-          <!-- /card atividade semanal -->
 
         </div>
         <!-- /profile-right -->
@@ -798,49 +791,29 @@
 <!-- /layout -->
 
 
-<!-- ════════════════════════════════════════════
-     MODAL — Nova Tarefa
-     Sobrepõe a tela com fundo escuro desfocado (backdrop blur).
-     Visibilidade controlada pela classe .open no elemento #modal:
-       - Abrir:  document.getElementById('modal').classList.add('open')
-       - Fechar: document.getElementById('modal').classList.remove('open')
-     Também pode ser fechado clicando fora da janela do modal
-     ou pressionando a tecla Escape (tratado no home.js).
-════════════════════════════════════════════ -->
+<!-- ════ MODAL — Nova Tarefa ════ -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
-
-    <!-- Cabeçalho do modal: título + botão X de fechar -->
     <div class="modal-header">
       <h3>Nova Tarefa</h3>
-      <!-- Fecha o modal removendo a classe .open do overlay -->
       <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">
-        <!-- Ícone de X (fechar) -->
         <svg viewBox="0 0 24 24">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
     </div>
-
-    <!-- Corpo do formulário de criação de tarefa -->
     <form method="POST" action="{{ route('tasks.store') }}" class="modal-form">
       @csrf
-      <!-- Campo: nome/título da tarefa (obrigatório) -->
       <div class="form-group">
         <label>Nome da Tarefa</label>
         <input type="text" name="title" placeholder="Ex: Revisar relatório mensal" required/>
       </div>
-
-      <!-- Campo: descrição detalhada (textarea com resize vertical habilitado via CSS) -->
       <div class="form-group">
         <label>Descrição</label>
         <textarea name="description" placeholder="Descreva os detalhes da tarefa..."></textarea>
       </div>
-
-      <!-- Linha com dois selects em colunas iguais -->
       <div class="modal-row">
-        <!-- Select: tipo de periodicidade da tarefa -->
         <div class="form-group">
           <label>Tipo</label>
           <select name="type" id="create-type">
@@ -849,7 +822,6 @@
             <option value="mensal">Mensal</option>
           </select>
         </div>
-        <!-- Select: nível de prioridade da tarefa -->
         <div class="form-group">
           <label>Prioridade</label>
           <select name="priority" id="create-priority">
@@ -859,23 +831,15 @@
           </select>
         </div>
       </div>
-      <!-- /modal-row -->
-
-      <!-- Campo: data limite para conclusão da tarefa -->
       <div class="form-group">
         <label>Data de Conclusão</label>
         <input type="date" name="due_date"/>
       </div>
-
-      <!-- Ações do modal: cancelar (descarta) ou criar (salva) -->
       <div class="modal-actions">
-        <!-- Fecha o modal sem salvar nenhuma informação -->
         <button type="button" class="btn btn-outline" onclick="document.getElementById('modal').classList.remove('open')">
           Cancelar
         </button>
-        <!-- Confirma a criação da tarefa — lógica de submit tratada no home.js -->
         <button type="submit" class="btn btn-primary">
-          <!-- Ícone de + -->
           <svg viewBox="0 0 24 24">
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
@@ -883,15 +847,11 @@
           Criar Tarefa
         </button>
       </div>
-
     </form>
-    <!-- /modal-form -->
-
   </div>
 </div>
-<!-- /modal -->
 
-<!-- MODAL EDITAR TAREFA -->
+<!-- ════ MODAL — Editar Tarefa ════ -->
 <div class="modal-overlay" id="modal-edit">
   <div class="modal">
     <div class="modal-header">
@@ -951,7 +911,6 @@
 </div>
 
 <script src="{{ asset('js/home.js') }}"></script>
-
 
 </body>
 </html>

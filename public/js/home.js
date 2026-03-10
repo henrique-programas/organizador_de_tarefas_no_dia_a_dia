@@ -81,3 +81,87 @@ document.getElementById('avatar-input').addEventListener('change', function() {
     document.getElementById('avatar-file-hidden').files = dt.files;
     document.getElementById('form-avatar').submit();
 });
+
+// Menu hambúrguer mobile
+const menuToggle = document.getElementById('menu-toggle');
+const sidebar    = document.querySelector('.sidebar');
+const overlay    = document.getElementById('sidebar-overlay');
+
+function toggleMenu() {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+
+if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
+if (overlay)    overlay.addEventListener('click', toggleMenu);
+
+// ── Tema escuro ──
+const themeToggle = document.getElementById('theme-toggle');
+const themeIcon   = document.getElementById('theme-icon');
+const themeLabel  = document.getElementById('theme-label');
+
+const moonSVG = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+const sunSVG  = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+
+function applyTheme(dark) {
+  if (dark) {
+    document.body.classList.add('dark');
+    themeIcon.innerHTML = sunSVG;
+    themeLabel.textContent = 'Tema Claro';
+  } else {
+    document.body.classList.remove('dark');
+    themeIcon.innerHTML = moonSVG;
+    themeLabel.textContent = 'Tema Escuro';
+  }
+}
+
+// Carregar preferência salva
+applyTheme(localStorage.getItem('theme') === 'dark');
+
+themeToggle.addEventListener('click', function() {
+  const isDark = document.body.classList.contains('dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  applyTheme(!isDark);
+});
+// ── VLibras ──
+const vlibrasToggle    = document.getElementById('vlibras-toggle');
+const vlibrasLabel     = document.getElementById('vlibras-label');
+const vlibrasContainer = document.getElementById('vlibras-container');
+let vlibrasIniciado    = false;
+
+function iniciarVLibras() {
+  // Cria o script dinamicamente e aguarda carregar para inicializar
+  const script = document.createElement('script');
+  script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
+  script.onload = function () {
+    new window.VLibras.Widget('https://vlibras.gov.br/app');
+    vlibrasIniciado = true;
+  };
+  document.head.appendChild(script);
+}
+
+function applyVLibras(ativo) {
+  if (ativo) {
+    vlibrasContainer.style.display = 'block';
+
+    if (!vlibrasIniciado) {
+      iniciarVLibras();
+    }
+
+    vlibrasLabel.textContent = 'VLibras (ativo)';
+    vlibrasToggle.style.color = 'var(--blue-primary)';
+  } else {
+    vlibrasContainer.style.display = 'none';
+    vlibrasLabel.textContent = 'VLibras';
+    vlibrasToggle.style.color = '';
+  }
+}
+
+// Carregar preferência salva
+applyVLibras(localStorage.getItem('vlibras') === 'on');
+
+vlibrasToggle.addEventListener('click', function () {
+  const ativo = localStorage.getItem('vlibras') === 'on';
+  localStorage.setItem('vlibras', ativo ? 'off' : 'on');
+  applyVLibras(!ativo);
+});

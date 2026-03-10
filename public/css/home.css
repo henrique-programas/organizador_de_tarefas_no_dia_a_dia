@@ -130,7 +130,9 @@ body{font-family:'Sora',sans-serif;background:var(--gray-light);color:var(--text
 .search-box input{width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--gray-border);border-radius:10px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);background:var(--white);outline:none;transition:border-color .2s,box-shadow .2s;}
 .search-box input:focus{border-color:var(--blue-primary);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
 .search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--text-soft);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;}
-.filter-chip{padding:9px 14px;border:1.5px solid var(--gray-border);border-radius:10px;background:var(--white);font-family:'Sora',sans-serif;font-size:12px;font-weight:500;color:var(--text-soft);cursor:pointer;transition:all .18s;white-space:nowrap;}
+.filter-chips-row{display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.filter-chips-row::-webkit-scrollbar{display:none;}
+.filter-chip{padding:9px 14px;border:1.5px solid var(--gray-border);border-radius:10px;background:var(--white);font-family:'Sora',sans-serif;font-size:12px;font-weight:500;color:var(--text-soft);cursor:pointer;transition:all .18s;white-space:nowrap;flex-shrink:0;}
 .filter-chip:hover,.filter-chip.active{border-color:var(--blue-primary);color:var(--blue-primary);background:var(--blue-xlight);}
 
 .tasks-section-title{font-size:13px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.9px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
@@ -231,4 +233,108 @@ textarea:focus{border-color:var(--blue-primary);}
     background: #FEF3C7;
     color: #D97706;
     border-color: #D97706;
+}
+/* ════ FULLCALENDAR — células dos dias mais visíveis ════ */
+
+/* Borda entre células */
+.fc .fc-daygrid-day {
+  border: 1px solid var(--gray-border) !important;
+}
+
+/* Número do dia — maior e mais visível */
+.fc .fc-daygrid-day-number {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 6px 8px;
+  width: 100%;
+  text-align: right;
+}
+
+/* Cabeçalho dos dias da semana */
+.fc .fc-col-header-cell {
+  background: var(--gray-light);
+  border: 1px solid var(--gray-border) !important;
+  padding: 6px 0;
+}
+.fc .fc-col-header-cell-cushion {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  text-decoration: none;
+}
+
+/* Dia de hoje — destaque azul forte */
+.fc .fc-day-today {
+  background: var(--blue-xlight) !important;
+}
+.fc .fc-day-today .fc-daygrid-day-number {
+  background: var(--blue-primary);
+  color: white;
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 4px 4px 0 auto;
+  font-size: 12px;
+}
+
+/* Hover nas células */
+.fc .fc-daygrid-day:hover {
+  background: var(--blue-xlight);
+  cursor: pointer;
+}
+
+/* Dias de outros meses — mais apagados */
+.fc .fc-day-other .fc-daygrid-day-number {
+  color: var(--gray-border);
+  font-weight: 400;
+}
+
+/* Remove borda dupla padrão do FullCalendar */
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: var(--gray-border) !important;
+}
+
+/* Eventos no calendário */
+.fc-event {
+  border-radius: 4px;
+  font-size: 11px;
+  padding: 1px 4px;
+  border: none !important;
+  cursor: pointer;
+}
+
+/* ════ DARK MODE — calendário ════ */
+body.dark .fc .fc-daygrid-day {
+  border-color: #334155 !important;
+}
+body.dark .fc .fc-col-header-cell {
+  background: #0F172A;
+  border-color: #334155 !important;
+}
+body.dark .fc .fc-daygrid-day-number {
+  color: #F1F5F9;
+}
+body.dark .fc .fc-day-today {
+  background: #1E3A5F !important;
+}
+body.dark .fc .fc-day-other .fc-daygrid-day-number {
+  color: #334155;
+}
+body.dark .fc-theme-standard td,
+body.dark .fc-theme-standard th {
+  border-color: #334155 !important;
+}
+body.dark .fc .fc-daygrid-day:hover {
+  background: #1E3A5F;
+}
+body.dark .fc .fc-scrollgrid {
+  border-color: #334155 !important;
 }
