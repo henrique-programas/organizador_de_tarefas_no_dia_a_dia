@@ -468,3 +468,77 @@ body.dark #vlibras-toggle:hover {
   background: #1E3A5F;
   color: #93C5FD;
 }
+
+/* ══════════════════════════════════════════
+   NOTIFICAÇÕES
+══════════════════════════════════════════ */
+
+/* Dropdown */
+#notif-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 300px;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--gray-border, #e5e7eb);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 9999;
+    overflow: hidden;
+}
+
+/* Tema escuro */
+body.dark #notif-dropdown {
+    background: #1E293B;
+    border-color: #334155;
+}
+body.dark .notif-item {
+    border-bottom-color: #334155;
+}
+body.dark .notif-new {
+    background: #1E3A5F;
+}
+body.dark .notif-msg {
+    color: #F1F5F9;
+}
+body.dark .toast-notification {
+    background: #1E293B;
+    border: 1px solid #334155;
+}
+
+/* ══════════════════════════════════════════
+   MOBILE — até 768px
+══════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+    /* Dropdown ocupa quase toda a tela no mobile */
+    #notif-dropdown {
+        position: fixed;
+        top: 56px;
+        right: 8px;
+        left: 8px;
+        width: auto;
+        max-height: 70vh;
+        overflow-y: auto;
+        border-radius: 12px;
+    }
+
+    /* Toast ocupa mais espaço no mobile */
+    .toast-notification {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        font-size: 12px;
+    }
+}
+
+/* ══════════════════════════════════════════
+   MOBILE PEQUENO — até 480px
+══════════════════════════════════════════ */
+@media (max-width: 480px) {
+    #notif-dropdown {
+        top: 56px;
+        right: 4px;
+        left: 4px;
+    }
+}

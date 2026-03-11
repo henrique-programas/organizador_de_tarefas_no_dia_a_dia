@@ -7,9 +7,11 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>TaskFlow</title>
   <link rel="stylesheet" href="{{ asset('css/home.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/home_notif.css') }}">
   <link rel="stylesheet" href="{{ asset('css/home_responsive.css') }}">
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  @vite(['resources/css/app.css', 'resources/js/app.js'])  {{-- precisa estar aqui --}}
 </head>
 <body>
 
@@ -54,15 +56,31 @@
   <!-- Lado direito da topbar -->
   <div class="topbar-right">
 
-    <!-- Botão de notificações com ponto vermelho indicando notificação não lida -->
-    <div class="notif-btn">
-      <!-- Ícone de sino -->
-      <svg viewBox="0 0 24 24">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-      </svg>
-      <!-- Indicador visual de notificação pendente -->
-      <div class="notif-dot"></div>
+    <!-- Botão de notificações com dropdown -->
+    <div class="notif-btn" id="notif-btn" onclick="toggleNotif()" style="position:relative;cursor:pointer;">
+        <svg viewBox="0 0 24 24">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <!-- Ponto vermelho — só aparece se tiver notificação não lida -->
+        <div class="notif-dot" id="notif-dot" style="display:none"></div>
+
+        <!-- Dropdown de notificações -->
+        <div id="notif-dropdown">
+            <!-- Cabeçalho -->
+            <div class="notif-header">
+                <span>Notificações</span>
+                <button onclick="markAllRead(event)">Marcar todas como lidas</button>
+            </div>
+
+            <!-- Lista de notificações (preenchida pelo JS) -->
+            <ul id="notif-list" style="list-style:none;margin:0;padding:0;max-height:320px;overflow-y:auto;"></ul>
+
+            <!-- Estado vazio -->
+            <div id="notif-empty" style="padding:20px;text-align:center;font-size:13px;color:var(--text-soft,#6b7280);">
+                Nenhuma notificação nova 🎉
+            </div>
+        </div>
     </div>
 
     <!-- Avatar do usuário — exibe foto de perfil se existir, senão as iniciais -->
@@ -910,7 +928,10 @@
   </div>
 </div>
 
-<script src="{{ asset('js/home.js') }}"></script>
+<script>
+    window.flashSuccess = "{{ session('success') }}";
+</script>
+<script src="{{ asset('js/home.js') }}"></script>>
 
 </body>
 </html>

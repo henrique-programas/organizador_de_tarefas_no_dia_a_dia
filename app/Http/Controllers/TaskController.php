@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Events\CrudActionEvent;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -25,7 +27,11 @@ class TaskController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        auth()->user()->tasks()->create($request->only('title', 'description', 'type', 'priority', 'due_date'));
+        $task = auth()->user()->tasks()->create(
+            $request->only('title', 'description', 'type', 'priority', 'due_date')
+        );
+
+        broadcast(new CrudActionEvent('created', 'Tarefa', $task->id, Auth::id()));
 
         return redirect()->route('home')->with('success', 'Tarefa criada!');
     }
@@ -54,26 +60,32 @@ class TaskController extends Controller
             'due_date'    => $request->due_date,
         ]);
 
+        broadcast(new CrudActionEvent('updated', 'Tarefa', $task->id, Auth::id()));
+
         return redirect()->route('home')->with('success', 'Tarefa atualizada!');
     }
 
     public function destroy(Task $task)
     {
         abort_if($task->user_id !== auth()->id(), 403);
+
+        $id = $task->id;
         $task->delete();
+
+        broadcast(new CrudActionEvent('deleted', 'Tarefa', $id, Auth::id()));
 
         return redirect()->route('home')->with('success', 'Tarefa removida!');
     }
 
     public function completeAll()
     {
-       auth()->user()->tasks()->where('completed', false)->update(['completed' => true]);
-       return redirect()->route('home')->with('success', 'Todas as tarefas concluídas!');
+        auth()->user()->tasks()->where('completed', false)->update(['completed' => true]);
+        return redirect()->route('home')->with('success', 'Todas as tarefas concluídas!');
     }
 
     public function destroyAll()
     {
-       auth()->user()->tasks()->delete();
-       return redirect()->route('home')->with('success', 'Todas as tarefas excluídas!');
+        auth()->user()->tasks()->delete();
+        return redirect()->route('home')->with('success', 'Todas as tarefas excluídas!');
     }
 }

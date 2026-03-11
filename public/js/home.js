@@ -165,3 +165,63 @@ vlibrasToggle.addEventListener('click', function () {
   localStorage.setItem('vlibras', ativo ? 'off' : 'on');
   applyVLibras(!ativo);
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (!window.flashSuccess) return;
+
+    const dot   = document.getElementById('notif-dot');
+    const list  = document.getElementById('notif-list');
+    const empty = document.getElementById('notif-empty');
+
+    // Sininho
+    dot.style.display = 'block';
+    empty.style.display = 'none';
+    const li = document.createElement('li');
+    li.className = 'notif-item notif-new';
+    li.innerHTML = `
+        <span class="notif-icon">🟢</span>
+        <div>
+            <div class="notif-msg">${window.flashSuccess}</div>
+            <div class="notif-time">agora mesmo</div>
+        </div>
+    `;
+    list.prepend(li);
+
+    // Toast
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = `<span class="toast-dot"></span>${window.flashSuccess}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+});
+
+// ── Sininho dropdown ──
+let notifOpen = false;
+
+function toggleNotif() {
+    notifOpen = !notifOpen;
+    const dropdown = document.getElementById('notif-dropdown');
+    dropdown.style.display = notifOpen ? 'block' : 'none';
+}
+
+function markAllRead(e) {
+    e.stopPropagation();
+    fetch('/notifications/read-all', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    }).then(() => {
+        document.getElementById('notif-dot').style.display = 'none';
+        document.querySelectorAll('.notif-item').forEach(li => li.classList.remove('notif-new'));
+    });
+}
+
+// Fecha ao clicar fora
+document.addEventListener('click', function(e) {
+    if (!document.getElementById('notif-btn').contains(e.target)) {
+        notifOpen = false;
+        const dropdown = document.getElementById('notif-dropdown');
+        if (dropdown) dropdown.style.display = 'none';
+    }
+});

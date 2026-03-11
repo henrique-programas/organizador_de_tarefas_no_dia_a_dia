@@ -338,3 +338,79 @@ body.dark .fc .fc-daygrid-day:hover {
 body.dark .fc .fc-scrollgrid {
   border-color: #334155 !important;
 }
+/* ── Toast ── */
+.toast-notification {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1f2937;
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    animation: slideIn .3s ease;
+}
+
+.toast-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10B981;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* ── Notif item ── */
+.notif-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--gray-border, #e5e7eb);
+    font-size: 13px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.notif-new {
+    background: var(--blue-xlight, #EFF6FF);
+}
+
+.notif-icon {
+    font-size: 16px;
+    margin-top: 1px;
+}
+
+.notif-msg {
+    font-weight: 500;
+    color: var(--text-main, #111);
+}
+
+.notif-time {
+    font-size: 11px;
+    color: var(--text-soft, #6b7280);
+    margin-top: 2px;
+}
+
+/* ── Animação ── */
+@keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+#notif-dropdown {
+    display: none;
+    position: absolute;
+    top: 44px;
+    right: 0;
+    width: 300px;
+    background: var(--white);
+    border: 1px solid var(--gray-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 9999;
+    overflow: hidden;
+}

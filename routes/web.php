@@ -3,6 +3,10 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
+use App\Http\Controllers\NotificationController;
+
+Broadcast::routes(['middleware' => ['web', 'auth']]);
 
 Route::get('/home', function () {
 
@@ -21,7 +25,6 @@ Route::get('/home', function () {
     $tarefaMensal  = auth()->user()->tasks()->where('type', 'mensal')->where('completed', false)->latest()->first()
                   ?? auth()->user()->tasks()->where('type', 'mensal')->latest()->first();
     
-    // Separando as tarefas por tipo em sub-collections
     $diarias = $tasks->where('type', 'diaria');
     $semanais = $tasks->where('type', 'semanal');
     $mensais = $tasks->where('type', 'mensal');
@@ -30,12 +33,10 @@ Route::get('/home', function () {
     $totalSemanal = $semanais->count();
     $totalMensal = $mensais->count();
     
-    // Pendentes por tipo (novo — pode usar no blade se quiser)
     $pendentesDiarias  = $diarias->where('completed', false)->count();
     $pendentesSemanaias = $semanais->where('completed', false)->count();
     $pendentesMensais  = $mensais->where('completed', false)->count();
     
-    // Taxas de conclusão por tipo
     $taxaDiaria  = $totalDiarias > 0
         ? round($diarias->where('completed', true)->count()  / $totalDiarias  * 100) : 0;
     $taxaSemanal = $totalSemanal > 0
@@ -51,7 +52,7 @@ Route::get('/home', function () {
     $concluidasNoPrazo = $tasks->filter(function($task) {
         return $task->completed &&
                $task->due_date &&
-               $task->updated_at->toDateString() <=$task->due_date;
+               $task->updated_at->toDateString() <= $task->due_date;
     })->count();
 
     $streak = 0;
@@ -77,20 +78,19 @@ Route::get('/home', function () {
     });
 
     $atividadeSemanal = collect(range(6, 0))->map(function ($diasAtras) use ($tasks) {
-    $dia = now()->subDays($diasAtras)->toDateString();
+        $dia = now()->subDays($diasAtras)->toDateString();
 
-    $criadas   = $tasks->filter(fn($t) => $t->created_at->toDateString() === $dia)->count();
-    $concluidas = $tasks->filter(fn($t) => $t->completed && $t->updated_at->toDateString() === $dia)->count();
+        $criadas   = $tasks->filter(fn($t) => $t->created_at->toDateString() === $dia)->count();
+        $concluidas = $tasks->filter(fn($t) => $t->completed && $t->updated_at->toDateString() === $dia)->count();
 
-    $status = 'inativo';
-    if ($criadas > 0 && $concluidas > 0) $status = 'completo';
-    elseif ($criadas > 0 || $concluidas > 0) $status = 'parcial';
+        $status = 'inativo';
+        if ($criadas > 0 && $concluidas > 0) $status = 'completo';
+        elseif ($criadas > 0 || $concluidas > 0) $status = 'parcial';
 
-    return [
-        'dia' => now()->subDays($diasAtras)->locale('pt_BR')->isoFormat('ddd'),
-        'status' => $status,
-    ];
-
+        return [
+            'dia' => now()->subDays($diasAtras)->locale('pt_BR')->isoFormat('ddd'),
+            'status' => $status,
+        ];
     });
     
     return view('home', compact(
@@ -112,7 +112,7 @@ Route::get('/tasks/calendar-events', function(){
     $tasks = auth()->user()->tasks()->whereNotNull('due_date')->get();
 
     $events = $tasks->map(function ($task) {
-        return[
+        return [
             'id' => $task->id,
             'title' => $task->title,
             'start' => $task->due_date,
@@ -130,7 +130,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/tasks/complete-all', [TaskController::class, 'completeAll'])->name('tasks.completeAll');
     Route::delete('/tasks/destroy-all', [TaskController::class, 'destroyAll'])->name('tasks.destroyAll');
     Route::resource('tasks', TaskController::class);
+    Route::get('/notifications',           [NotificationController::class, 'index'])   ->name('notifications.index');
+    Route::get('/notifications/{id}/read', [NotificationController::class, 'read'])    ->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll']) ->name('notifications.readAll');
 });
-
 
 require __DIR__.'/auth.php';
