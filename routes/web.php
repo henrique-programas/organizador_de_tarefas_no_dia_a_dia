@@ -8,6 +8,10 @@ use App\Http\Controllers\NotificationController;
 
 Broadcast::routes(['middleware' => ['web', 'auth']]);
 
+Route::get('/', function () {
+    return redirect()->route('login');
+});
+
 Route::get('/home', function () {
 
     $tasks = auth()->user()->tasks()->latest()->get();
