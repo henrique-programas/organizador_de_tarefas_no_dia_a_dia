@@ -9,7 +9,7 @@ use App\Http\Controllers\NotificationController;
 Broadcast::routes(['middleware' => ['web', 'auth']]);
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return redirect('/login');
 });
 
 Route::get('/home', function () {
